@@ -36,12 +36,40 @@
             </div>
 
             <div id="navbar_pages">
-                <span><img src=""/>Alerts</span>
-                <span>Potential Hotspots</span>
-                <span>Settings</span>
+                <span ng-repeat="icon in icons">
+                    <span ng-repeat="(key, value) in icon" 
+                        ng-init="itemsrc = value[0]"
+                        ng-mouseover="itemsrc = value[1]"
+                        ng-mouseout="itemsrc = value[0]"
+                    >
+                        <img ng-src="{{itemsrc}}"/>
+                        {{key}}
+                    </span> 
+                </span> 
             </div>
 
 
         </nav>
+
+        <!-- Content Here -->
+
+        <footer class="footer">
+            <div class="content">
+
+                <div id="timeline">
+                    Timeline
+                </div>
+
+                <div id="overlay">
+                    Overlay
+                </div>
+
+                <div id="panels">
+                    Panels
+                </div>
+
+            </div>
+        </footer>
+
     </body>
 </html>
