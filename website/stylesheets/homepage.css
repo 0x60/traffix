@@ -1,0 +1,36 @@
+#traffix_navbar{
+	padding: 25px 0px 25px 10%;
+	border          : 1px solid #E0E0E0;
+  	box-shadow      : 0px 1px 2px 1px rgba(0,0,0,0.08);
+}
+
+#traffix_navbar div{
+	display: inline-block;
+}
+
+#traffix_navbar #navbar_header{
+	opacity: 0.6;
+	font-family: Helvetica-Bold;
+	font-size: 18px;
+	color: #000000;
+	letter-spacing: 0px;
+}
+
+#traffix_navbar #navbar_city{
+	font-family: Helvetica;
+	font-size: 18px;
+	color: #000000;
+	letter-spacing: 0px;
+}
+
+#traffix_navbar #navbar_pages{
+	float: right;
+	padding-right: 5%;
+}
+
+#traffix_navbar #navbar_pages span{
+	font-family: Helvetica;
+	font-size: 18px;
+	color: #000000;
+	letter-spacing: 0px;
+}
