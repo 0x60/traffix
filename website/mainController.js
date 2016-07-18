@@ -1,9 +1,8 @@
 // Traffix App
 
-var traffixApp = angular.module('traffixApp', []);
+var traffixApp = angular.module('traffixApp', ['rzModule']);
 
-traffixApp.controller('MainController', ['$scope', '$rootScope', '$http',
-function ($scope, $rootScope, $http) {
+traffixApp.controller('MainController', function ($scope, $rootScope, $http) {
 
 	$scope.icons = [
 		{"Alert":["images/warningImage.png", "images/warningImageHover.png"]}, 
@@ -11,6 +10,8 @@ function ($scope, $rootScope, $http) {
 		{"Settings": ["images/settings.png", "images/settingsHover.png"]}
 	];
 
+	$scope.slider = 10;
 
 
-}]);
+
+});

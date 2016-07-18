@@ -3,17 +3,19 @@
     <head>
         <title>Traffix</title>
 
-        <script src="javascript/jquery.js"></script>
+        <script src="javascript/jquery-3.1.0.min.js"></script>
 
         <script src="javascript/angular.min.js"></script>
         <script src="javascript/angular-route.js"></script>
         <script src="javascript/bootstrap.min.js"></script>
+        <script src="javascript/rzslider.min.js"></script>
         <script src="javascript/ui-bootstrap-tpls.js"></script>
 
         <script src="MainController.js"></script>
 
         <link rel="stylesheet" type="text/css" href="stylesheets/homepage.css" />
         <link rel="stylesheet" type="text/css" href="stylesheets/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" href="stylesheets/rzslider.css" />
 
     </head>
     <body>
@@ -58,14 +60,25 @@
 
                 <div id="timeline">
                     TIMELINE
+
+                    <rzslider rz-slider-model="slider"></rzslider>
                 </div>
 
                 <div id="overlay">
                     OVERLAY
+                    <div id="overlay_checkbox">
+                        <input type="checkbox">Traffic Flow</input>
+                        <input type="checkbox">Accidents</input>
+                        <input type="checkbox">Potential Hotspots</input>
+                    </div>
                 </div>
 
                 <div id="panels">
                     PANELS
+                    <div id="panels_checkbox">
+                        <input type="checkbox">Graphs</input>
+                        <input type="checkbox">Other Statistics</input>
+                    </div>
                 </div>
 
             </div>
