@@ -66,11 +66,6 @@
 	letter-spacing: 0px;
 }
 
-.footer .content div{
-	display: inline-block;
-	padding-right: 20px;
-}
-
 .footer .content #overlay_checkbox, #panels_checkbox{
 	display: block;
 }
