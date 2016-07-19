@@ -111,5 +111,10 @@ html, body{
 
 .footer .content #overlay_checkbox, #panels_checkbox{
 	display: block;
+	padding-right: 5px;
+}
+
+.footer .content input[type=checkbox]{
+	margin: 4px 10px 0px 0px;
 }
 

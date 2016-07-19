@@ -9,10 +9,12 @@ traffixApp.controller('MainController', function ($scope, $rootScope, $http) {
 		{"Settings": ["images/settings.png", "images/settingsHover.png"]}
 	];
 
-	$scope.slider = 10;
-
-
-
+	$scope.slider = {
+	    value: 10,
+	    options: {
+	        showSelectionBar: true
+	    }
+	};
 });
 
 
@@ -24,5 +26,6 @@ $(document).ready(function() {
 	function hide_splash(){
 		$("#splash_screen").fadeOut(500);
 		$("#content").fadeIn(500);
+		$scope.$broadcast('rzSliderForceRender');
 	}
 });
