@@ -19,70 +19,76 @@
 
     </head>
     <body>
-        <nav class="navbar navbar-default navbar-fixed-top" id="traffix_navbar">
-  
-            <div id="navbar_header">
-                Traffix
-            </div>
+        <div id="splash_screen">
+            <h1>Traffix</h1>
+            <h2>Powered by Predix</h2>
+        </div>
+        <div id="content"> 
+            <nav class="navbar navbar-default navbar-fixed-top" id="traffix_navbar">
+      
+                <div id="navbar_header">
+                    Traffix
+                </div>
 
-            <div id="navbar_city">
-                San Diego
-            </div>
+                <div id="navbar_city">
+                    San Diego
+                </div>
 
-            <!-- Search Bar -->
-            <div id="search_input_container">
-              <input
-                id="search_input"
-                type="text"
-                >
-            </div>
-
-            <div id="navbar_pages">
-                <span ng-repeat="icon in icons">
-                    <span ng-repeat="(key, value) in icon" 
-                        ng-init="itemsrc = value[0]"
-                        ng-mouseover="itemsrc = value[1]"
-                        ng-mouseout="itemsrc = value[0]"
+                <!-- Search Bar -->
+                <div id="search_input_container">
+                  <input
+                    id="search_input"
+                    type="text"
                     >
-                        <img ng-src="{{itemsrc}}"/>
-                        {{key}}
+                </div>
+
+                <div id="navbar_pages">
+                    <span ng-repeat="icon in icons">
+                        <span ng-repeat="(key, value) in icon" 
+                            ng-init="itemsrc = value[0]"
+                            ng-mouseover="itemsrc = value[1]"
+                            ng-mouseout="itemsrc = value[0]"
+                        >
+                            <img ng-src="{{itemsrc}}"/>
+                            {{key}}
+                        </span> 
                     </span> 
-                </span> 
-            </div>
-
-
-        </nav>
-
-        <!-- Content Here -->
-
-        <footer class="footer">
-            <div class="content container-fluid">
-
-                <div id="timeline" class="col-md-4">
-                    TIMELINE
-
-                    <rzslider rz-slider-model="slider"></rzslider>
                 </div>
 
-                <div id="overlay" class="col-md-4">
-                    OVERLAY
-                    <div id="overlay_checkbox">
-                        <input type="checkbox">Traffic Flow</input>
-                        <input type="checkbox">Accidents</input>
-                        <input type="checkbox">Potential Hotspots</input>
+
+            </nav>
+
+            <!-- Content Here -->
+
+            <footer class="footer">
+                <div class="content container-fluid">
+
+                    <div id="timeline" class="col-md-4">
+                        TIMELINE
+
+                        <rzslider rz-slider-model="slider"></rzslider>
                     </div>
-                </div>
 
-                <div id="panels" class="col-md-4">
-                    PANELS
-                    <div id="panels_checkbox">
-                        <input type="checkbox">Graphs</input>
-                        <input type="checkbox">Other Statistics</input>
+                    <div id="overlay" class="col-md-4">
+                        OVERLAY
+                        <div id="overlay_checkbox">
+                            <input type="checkbox">Traffic Flow</input>
+                            <input type="checkbox">Accidents</input>
+                            <input type="checkbox">Potential Hotspots</input>
+                        </div>
                     </div>
-                </div>
 
-            </div>
-        </footer>
+                    <div id="panels" class="col-md-4">
+                        PANELS
+                        <div id="panels_checkbox">
+                            <input type="checkbox">Graphs</input>
+                            <input type="checkbox">Other Statistics</input>
+                        </div>
+                    </div>
+
+                </div>
+            </footer>
+        </div>
 
     </body>
 </html>

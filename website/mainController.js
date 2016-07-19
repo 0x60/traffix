@@ -1,5 +1,4 @@
 // Traffix App
-
 var traffixApp = angular.module('traffixApp', ['rzModule']);
 
 traffixApp.controller('MainController', function ($scope, $rootScope, $http) {
@@ -14,4 +13,16 @@ traffixApp.controller('MainController', function ($scope, $rootScope, $http) {
 
 
 
+});
+
+
+
+$(document).ready(function() {
+
+	setTimeout(hide_splash, 2000);
+
+	function hide_splash(){
+		$("#splash_screen").fadeOut(500);
+		$("#content").fadeIn(500);
+	}
 });
