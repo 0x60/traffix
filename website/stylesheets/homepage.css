@@ -94,7 +94,7 @@ html, body{
 
 #traffix_navbar #navbar_pages li p{
 	display: inline-block;
-	margin: 0;
+	margin: 0px 0px 0px 5px;
 }
 
 #traffix_navbar #navbar_pages ul li ul{
@@ -134,7 +134,7 @@ html, body{
 #traffix_navbar #navbar_pages #alert_dropdown:hover ul{
 	display: block;
 	position: absolute;
-	margin-left: -220px;
+	margin-left: -222px;
 	margin-top: 25px;
 }
 

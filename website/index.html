@@ -86,6 +86,14 @@
                                 </span>
                             </ul>
                         </li>
+
+                        <li ng-init="settingsrc = icons.settings[0]"
+                            ng-mouseover="settingsrc = icons.settings[1]"
+                            ng-mouseout="settingsrc = icons.settings[0]">
+
+                            <img ng-src="{{settingsrc}}"/>
+                            <p>Settings</p>
+                        </li>
                     </ul>
                 </div>
 
