@@ -43,7 +43,7 @@
                 </div>
 
                 <div id="navbar_pages">
-                    <span ng-repeat="icon in icons">
+                    <!-- <span ng-repeat="icon in icons">
                         <span ng-repeat="(key, value) in icon" 
                             ng-init="itemsrc = value[0]"
                             ng-mouseover="itemsrc = value[1]"
@@ -52,8 +52,44 @@
                             <img ng-src="{{itemsrc}}"/>
                             {{key}}
                         </span> 
-                    </span> 
+                    </span>  -->
+                    <ul>
+                        <li id="alert_dropdown"
+                            ng-init="alertsrc = icons.alert[0]"
+                            ng-mouseover="alertsrc = icons.alert[1]"
+                            ng-mouseout="alertsrc = icons.alert[0]">
+
+                            <img ng-src="{{alertsrc}}"/>
+                            <p>Alerts</p>
+                            <ul>
+                                <p>CURRENT INCIDENTS</p>
+                                <span ng-repeat="incident in current_incidents">
+                                    <li>{{incident.intersection}}</li>
+                                    <span ng-if="!$last"><hr /></span>
+                                </span>
+
+                            </ul>
+
+                        </li>
+                        <li id="hotspot_dropdown"
+                            ng-init="hotspotsrc = icons.hotspots[0]"
+                            ng-mouseover="hotspotsrc = icons.hotspots[1]"
+                            ng-mouseout="hotspotsrc = icons.hotspots[0]">
+
+                            <img ng-src="{{hotspotsrc}}"/>
+                            <p>Potential Hotspots</p>
+                            <ul>
+                                <p>POTENTIAL ACCIDENTS</p>
+                                <span ng-repeat="incident in current_incidents">
+                                    <li>{{incident.intersection}}</li>
+                                    <span ng-if="!$last"><hr /></span>
+                                </span>
+                            </ul>
+                        </li>
+                    </ul>
                 </div>
+
+
 
 
             </nav>

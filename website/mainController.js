@@ -1,13 +1,12 @@
 // Traffix App
 var traffixApp = angular.module('traffixApp', ['rzModule']);
 
-traffixApp.controller('MainController', function ($scope, $rootScope, $http) {
+traffixApp.controller('MainController', function ($scope, $rootScope, $http, $sce) {
 
-	$scope.icons = [
-		{"Alert":["images/warningImage.png", "images/warningImageHover.png"]}, 
-		{"Potential Hotspots": ["images/potentialHotspots.png", "images/potentialHotspotsHover.png"]},
-		{"Settings": ["images/settings.png", "images/settingsHover.png"]}
-	];
+	$scope.icons = {"alert": ["images/warningImage.png", "images/warningImageHover.png"], 
+					"hotspots": ["images/potentialHotspots.png", "images/potentialHotspotsHover.png"],
+					"settings": ["images/settings.png", "images/settingsHover.png"]
+				   };
 
 	$scope.slider = {
 	    value: 10,
@@ -15,9 +14,21 @@ traffixApp.controller('MainController', function ($scope, $rootScope, $http) {
 	        showSelectionBar: true
 	    }
 	};
+
+	//Based on the slider setting, we get the corresponding data from our SQL table
+
+	//This is just dummy data for now
+	$scope.current_incidents = [{'intersection':'Pacific Highway & W Broadway'}, 
+								{'intersection':'W Broadway & State St.'},
+								{'intersection':'W Ash St. & India St.'},
+								{'intersection':'Front St. & Beach St.'}];
+
+
+	//Functions need for this app
+	$scope.toTrustedHTML = function(html) {
+        return $sce.trustAsHtml(html);
+    };
 });
-
-
 
 $(document).ready(function() {
 
