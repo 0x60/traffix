@@ -10,12 +10,14 @@
         <script src="javascript/bootstrap.min.js"></script>
         <script src="javascript/rzslider.min.js"></script>
         <script src="javascript/ui-bootstrap-tpls.js"></script>
+        <script src='https://api.mapbox.com/mapbox-gl-js/v0.21.0/mapbox-gl.js'></script>
 
         <script src="MainController.js"></script>
 
         <link rel="stylesheet" type="text/css" href="stylesheets/homepage.css" />
         <link rel="stylesheet" type="text/css" href="stylesheets/bootstrap.min.css" />
         <link rel="stylesheet" type="text/css" href="stylesheets/rzslider.css" />
+        <link href='https://api.mapbox.com/mapbox-gl-js/v0.21.0/mapbox-gl.css' rel='stylesheet' />
 
     </head>
     <body>
@@ -43,16 +45,6 @@
                 </div>
 
                 <div id="navbar_pages">
-                    <!-- <span ng-repeat="icon in icons">
-                        <span ng-repeat="(key, value) in icon" 
-                            ng-init="itemsrc = value[0]"
-                            ng-mouseover="itemsrc = value[1]"
-                            ng-mouseout="itemsrc = value[0]"
-                        >
-                            <img ng-src="{{itemsrc}}"/>
-                            {{key}}
-                        </span> 
-                    </span>  -->
                     <ul>
                         <li id="alert_dropdown"
                             ng-init="alertsrc = icons.alert[0]"
@@ -96,13 +88,10 @@
                         </li>
                     </ul>
                 </div>
-
-
-
-
             </nav>
 
             <!-- Content Here -->
+            <div id='map' style='width: 100%;'></div>
 
             <footer class="footer">
                 <div class="content container-fluid">
@@ -134,6 +123,16 @@
                 </div>
             </footer>
         </div>
+
+        <script>
+            mapboxgl.accessToken = 'pk.eyJ1IjoidHVuZ2FsYmVydDk5IiwiYSI6ImNpcXhkbGplbTAxZnhmdm1nMjkycnE5ZjYifQ.nPjdhFFlu1agC8JmquUkkw';
+            var map = new mapboxgl.Map({
+                container: 'map',
+                style: 'mapbox://styles/tungalbert99/ciqxdskwv0007c4ktiubhssd4'
+            });
+
+            document.getElementById("map").height = window.innerHeight + "px";
+        </script>
 
     </body>
 </html>

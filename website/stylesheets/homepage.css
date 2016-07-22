@@ -134,14 +134,14 @@ html, body{
 #traffix_navbar #navbar_pages #alert_dropdown:hover ul{
 	display: block;
 	position: absolute;
-	margin-left: -222px;
+	margin-left: -217px;
 	margin-top: 25px;
 }
 
 #traffix_navbar #navbar_pages #hotspot_dropdown:hover ul{
 	display: block;
 	position: absolute;
-	margin-left: -132px;
+	margin-left: -128px;
 	margin-top: 25px;
 }
 
