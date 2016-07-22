@@ -36,7 +36,6 @@ $(document).ready(function() {
 
 	function hide_splash(){
 		$("#splash_screen").fadeOut(500);
-		$("#content").fadeIn(500);
 		// $scope.$broadcast('rzSliderForceRender');
 
 		document.getElementById("map").style.height = window.innerHeight + "px";
