@@ -37,6 +37,13 @@ $(document).ready(function() {
 	function hide_splash(){
 		$("#splash_screen").fadeOut(500);
 		$("#content").fadeIn(500);
-		$scope.$broadcast('rzSliderForceRender');
+		// $scope.$broadcast('rzSliderForceRender');
+
+		document.getElementById("map").style.height = window.innerHeight + "px";
+		mapboxgl.accessToken = 'pk.eyJ1IjoidHVuZ2FsYmVydDk5IiwiYSI6ImNpcXhkbGplbTAxZnhmdm1nMjkycnE5ZjYifQ.nPjdhFFlu1agC8JmquUkkw';
+		var map = new mapboxgl.Map({
+			container: 'map',
+			style: 'mapbox://styles/tungalbert99/ciqxdskwv0007c4ktiubhssd4'
+		});
 	}
 });
