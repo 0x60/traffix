@@ -23,6 +23,10 @@ traffixApp.controller('MainController', function ($scope, $rootScope, $http, $sc
 								{'intersection':'W Ash St. & India St.'},
 								{'intersection':'Front St. & Beach St.'}];
 
+	// Panels
+	$scope.showPanelGraph = false;
+	$scope.showPanelStats = false;
+
 
 	//Functions need for this app
 	$scope.toTrustedHTML = function(html) {

@@ -91,6 +91,9 @@
             </nav>
 
             <!-- Content Here -->
+            <div class="panels graph" ng-if="showPanelGraph">Graphs</div>
+            <div class="panels stats" ng-if="showPanelStats">Stats</div>
+
             <div id='map'></div>
 
             <footer class="footer">
@@ -115,8 +118,8 @@
                     <div id="panels" class="col-md-4">
                         PANELS
                         <div id="panels_checkbox">
-                            <input type="checkbox">Graphs</input>
-                            <input type="checkbox">Other Statistics</input>
+                            <input type="checkbox" ng-model="showPanelGraph">Graphs</input>
+                            <input type="checkbox" ng-model="showPanelStats">Other Statistics</input>
                         </div>
                     </div>
 
