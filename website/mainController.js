@@ -49,6 +49,25 @@ $(document).ready(function() {
 		L.mapbox.accessToken = 'pk.eyJ1IjoidHVuZ2FsYmVydDk5IiwiYSI6ImNpcXhkbGplbTAxZnhmdm1nMjkycnE5ZjYifQ.nPjdhFFlu1agC8JmquUkkw';
 
 		map = L.mapbox.map('map')
+		//Keep in mind that the coordinates for geojson are longitude, latitude and for map.setView is latitude, longitude
+		var geojson = [
+		  {
+		    "type": "Feature",
+		    "geometry": {
+				"type": "Point",
+				"coordinates": [-117.1676888, 32.7465933]
+		    },
+		    "properties": {
+				"title": "Accident",
+				"description": "3773-3799 Curlew Street, San Diego, CA",
+				"marker-color": "#3ca0d3",
+				"marker-size": "large",
+				"marker-symbol": "car"
+		    }
+		  }
+		];
+
+		map = L.mapbox.map('map')
 		  .setView([32.7157, -117.1611], 13);
 
 		L.tileLayer('https://api.mapbox.com/styles/v1/tungalbert99/ciqxdskwv0007c4ktiubhssd4/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoidHVuZ2FsYmVydDk5IiwiYSI6ImNpcXhkbGplbTAxZnhmdm1nMjkycnE5ZjYifQ.nPjdhFFlu1agC8JmquUkkw').addTo(map);
