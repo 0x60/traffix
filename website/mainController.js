@@ -34,6 +34,8 @@ traffixApp.controller('MainController', function ($scope, $rootScope, $http, $sc
     };
 });
 
+var map;
+
 $(document).ready(function() {
 
 	setTimeout(hide_splash, 2000);
@@ -46,29 +48,46 @@ $(document).ready(function() {
 
 		L.mapbox.accessToken = 'pk.eyJ1IjoidHVuZ2FsYmVydDk5IiwiYSI6ImNpcXhkbGplbTAxZnhmdm1nMjkycnE5ZjYifQ.nPjdhFFlu1agC8JmquUkkw';
 
-		//Keep in mind that the coordinates for geojson are longitude, latitude and for map.setView is latitude, longitude
-		var geojson = [
-		  {
-		    "type": "Feature",
-		    "geometry": {
-		      "type": "Point",
-		      "coordinates": [-117.1676888, 32.7465933]
-		    },
-		    "properties": {
-		      "marker-color": "#3ca0d3",
-		      "marker-size": "large",
-		      "marker-symbol": "car"
-		    }
-		  }
-		];
-
-		var map = L.mapbox.map('map')
+		map = L.mapbox.map('map')
 		  .setView([32.7157, -117.1611], 13);
 
 		L.tileLayer('https://api.mapbox.com/styles/v1/tungalbert99/ciqxdskwv0007c4ktiubhssd4/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoidHVuZ2FsYmVydDk5IiwiYSI6ImNpcXhkbGplbTAxZnhmdm1nMjkycnE5ZjYifQ.nPjdhFFlu1agC8JmquUkkw').addTo(map);
 
-		var myLayer = L.mapbox.featureLayer().setGeoJSON(geojson).addTo(map);
 
+		// add accidents
+		add_accidents();
 	}
 
 });
+
+function add_accidents() {
+	// get request
+	$.get( "assets/accidents_SanDiego.txt", function( data ) {
+		// get json
+		var data = JSON.parse( data );
+		var geojson = [];
+
+		// iterate through items
+		for( var i = 0; i < data.length; i++ ) {
+			console.log( data[ i ] );
+
+			// create
+			geojson.push( {
+				"type": "Feature",
+				"geometry": {
+					"type": "Point",
+					"coordinates": [ data[ i ].location[ 1 ], data[ i ].location[ 0 ]]
+				},
+				"properties": {
+					"marker-color": "#3ca0d3",
+					"marker-size": "large",
+					"marker-symbol": "car"
+				}
+			} );
+		}
+
+		// add to map
+		var myLayer = L.mapbox.featureLayer().setGeoJSON(geojson).addTo(map);
+	} );
+
+}
