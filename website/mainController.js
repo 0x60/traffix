@@ -51,13 +51,15 @@ $(document).ready(function() {
 		  {
 		    "type": "Feature",
 		    "geometry": {
-		      "type": "Point",
-		      "coordinates": [-117.1676888, 32.7465933]
+				"type": "Point",
+				"coordinates": [-117.1676888, 32.7465933]
 		    },
 		    "properties": {
-		      "marker-color": "#3ca0d3",
-		      "marker-size": "large",
-		      "marker-symbol": "car"
+				"title": "Accident",
+				"description": "3773-3799 Curlew Street, San Diego, CA",
+				"marker-color": "#3ca0d3",
+				"marker-size": "large",
+				"marker-symbol": "car"
 		    }
 		  }
 		];
