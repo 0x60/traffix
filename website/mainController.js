@@ -1,7 +1,8 @@
 // Traffix App
-var traffixApp = angular.module('traffixApp', ['rzModule']);
+var traffixApp = angular.module('traffixApp', ['rzModule', 'ngResource']);
 
-traffixApp.controller('MainController', function ($scope, $rootScope, $http, $sce) {
+traffixApp.controller('MainController', ['$scope', '$rootScope', '$resource', '$http',
+	function ($scope, $rootScope, $resource, $http, $sce) {
 
 	$scope.icons = {"alert": ["images/warningImage.png", "images/warningImageHover.png"], 
 					"hotspots": ["images/potentialHotspots.png", "images/potentialHotspotsHover.png"],
@@ -32,7 +33,15 @@ traffixApp.controller('MainController', function ($scope, $rootScope, $http, $sc
 	$scope.toTrustedHTML = function(html) {
         return $sce.trustAsHtml(html);
     };
-});
+
+    $scope.testFunction = function(){
+    	var newList = $resource('/test');
+
+        $scope.someHTML = newList.get();
+        console.log($scope.someHTML);
+    };
+
+}]);
 
 var map;
 

@@ -20,11 +20,16 @@ app.get('/', function (request, response) {
     response.send('Simple web server of files from ' + __dirname);
 });
 
-request('http://www.google.com', function (error, response, body) {
-  if (!error && response.statusCode == 200) {
-    console.log(body) // Show the HTML for the Google homepage.
-  }
-})
+app.get('/test', function (req, res){
+
+	request('http://www.google.com', function (error, response, body) {
+		if (!error && response.statusCode == 200) {
+			res.status(200).send(body);
+		}
+	})
+});
+
+
 
 // var options = {
 //   url: 'https://api.github.com/repos/request/request',
