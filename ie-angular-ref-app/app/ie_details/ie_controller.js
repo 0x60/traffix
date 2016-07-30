@@ -8,6 +8,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
     var numAssets = 12;
     $scope.assetNumbers = [];
     $scope.trafficData = [];
+    $scope.pedestrianData = [];
 
     for(var i = 0; i < numAssets; i++){
       $scope.assetNumbers.push(startingAsset + i);
@@ -27,10 +28,10 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
       }).then(function(){
         // populate the start time, end time and size to give calls to apis.
         var endTime = moment.now();
-        var startTime = moment(endTime).subtract(1, 'day').valueOf();
+        var startTime = moment(endTime).subtract(1, 'hour').valueOf();
 
         $scope.getTrafficData(startTime, endTime, startingAsset);
-        $scope.getPedestrianData(startTime, endTime);
+        $scope.getPedestrianData(startTime, endTime, '1000000027');
 
         // change the size for parking and public safety calls.
         size = 200;
@@ -46,7 +47,6 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
     $scope.getTrafficData = function(startTime, endTime, assetNumber) {
 
       CurrentServices.getTrafficData($scope.uaaToken, startTime, endTime, assetNumber).then(function(data){
-        console.log(data);
         if(data && data._embedded && data._embedded.events && data._embedded.events.length > 0) {
           for(var i = 0; i < data._embedded.events.length; i++) {
             var event = data._embedded.events[i];
@@ -75,8 +75,10 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
         if(data._links["next-page"]) {
           var url = data._links["next-page"]["href"];
           var newStartTime = url.substring(url.indexOf("start-ts=") + 9, url.indexOf("&end-ts"));
-          var newEndTime = url.substring(url.indexOf("end-ts=") + 7, url.indexOf("&size"));
-          $scope.getTrafficData(newStartTime, newEndTime, assetNumber);
+          if(newStartTime !== 0){
+            var newEndTime = url.substring(url.indexOf("end-ts=") + 7, url.indexOf("&size"));
+            $scope.getTrafficData(newStartTime, newEndTime, assetNumber);
+          }
         }
         else{
           return;
@@ -91,25 +93,37 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
     * Below method will make a call to pedestrian event Service and
     * populates the response data in scope object.
     */
-    $scope.getPedestrianData = function(startTime, endTime, size) {
-      var pedestrianData = {};
+    $scope.getPedestrianData = function(startTime, endTime, assetNumber) {
 
-      CurrentServices.getPedestrianData($scope.uaaToken, startTime, endTime, size).then(function(data){
+      CurrentServices.getPedestrianData($scope.uaaToken, startTime, endTime, assetNumber).then(function(data){
         if(data && data._embedded && data._embedded.events && data._embedded.events.length > 0) {
-            var event = data._embedded.events[0];
-            pedestrianData.time = moment(event.timestamp).format('MMM Do YYYY, h:mm:ss a');
-            pedestrianData['location'] = event['location-uid'];
+          for(var i = 0; i < data._embedded.events.length; i++) {
+            var event = data._embedded.events[i];
+            var objectData = {};
+            objectData.time = moment(event.timestamp).format('MMM Do YYYY, h:mm:ss a');
+            objectData['location'] = event['location-uid'];
             if(event && event.measures && event.measures.length > 0) {
               var measure = event.measures[0];
 
               if(measure.tag && measure.tag === 'SFCNT') {
-                pedestrianData.count = measure.value;
+                objectData.count = measure.value;
               }
             }
+
+            $scope.pedestrianData.push(objectData);
+          }
+
+          if(data._links["next-page"]) {
+            var url = data._links["next-page"]["href"];
+            var newStartTime = url.substring(url.indexOf("start-ts=") + 9, url.indexOf("&end-ts"));
+            if(newStartTime !== 0){
+              var newEndTime = url.substring(url.indexOf("end-ts=") + 7, url.indexOf("&size"));
+              $scope.getPedestrianData(newStartTime, newEndTime, assetNumber);
+            }
+          }
         }
       });
 
-      $scope.pedestrianData = pedestrianData;
     };
 
     /**
@@ -119,6 +133,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
     $scope.getPublicSafetyData = function(startTime, endTime, size) {
       var publicSafetyData = {};
       CurrentServices.getPublicSafetyData($scope.uaaToken, startTime, endTime, size).then(function(data){
+        console.log(data);
         if(data && data._embedded && data._embedded.medias) {
             var eventsLen =  data._embedded.medias.length;
             for (var eventsIdx = 0; eventsIdx < eventsLen; eventsIdx++) {

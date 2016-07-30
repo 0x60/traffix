@@ -12,7 +12,7 @@
         <div class="panel-body">
           <p class="text-left lead2">Below information is received from Intelligent Environment's Traffic API Service call.</p>
           <ul class="text-left">
-            <div ng-repeat="objectData in trafficData">
+            <div ng-repeat="objectData in trafficData | limitTo: 15">
               {{objectData}}
             </div>
             <!-- <li><span class="labelClass">Speed:</span> {{trafficData.speed}}</li>
@@ -59,11 +59,9 @@
         <!-- end panel-heading -->
         <div class="panel-body">
           <p class="text-left lead2">Below information is received from Intelligent Environment's Pedestrian API Service call.</p>
-          <ul class="text-left">
-            <li><span class="labelClass">Count:</span> {{pedestrianData.count}}</li>
-            <li><span class="labelClass">Time:</span> {{pedestrianData.time}}</li>
-            <li><span class="labelClass">Location:</span> {{pedestrianData.location}}</li>
-          </ul> <a class="btn btn-primary" style="margin-top: 32px;" >More Info <span class="fontComingSoon">(coming soon...)</span> »</a>
+          <div ng-repeat="objectData in pedestrianData | limitTo: 15">
+              {{objectData}}
+          </div>
         </div>
         <!-- end panel-body -->
       </div>
