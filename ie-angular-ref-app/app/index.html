@@ -23,66 +23,20 @@
 </head>
 <body class="app">
   <div class="bodyDiv">
-    <div class="headerDiv navbar navbar-default navbar-static-top templatecontainer">
-
-      <div class="container">
-
-          <div class="masthead navbar-header">
-              <a class="navbar-brand" href="#" data-ng-cloak="">
-                  <span class="ge-logo"></span>
-                  <span>Intelligent Environment AngularJS Reference App
-                  </span>
-              </a>
-          </div>
-          <div class="notifications pull-right">
-              <div class="btn-toolbar">
-                  <div class="btn-group">
-                      <!-- Signout link for authentication - Adds implicit grant oauth -->
-                      <px-oauth
-                          site="site"
-                          client-id="clientId"
-                          redirect-uri="redirectUri">
-                      </px-oauth>
-                  </div>
-              </div>
-          </div>
-      </div>
-
-      <div class="primary-navbar navbar-collapse">
-          <div class="container">
-            <ul class="nav navbar-nav" data-ng-cloak="">
-              <li class="active"><a href="#!/ie_details">IE Service Details</a></li>
-              <li><a href="" class="disabled" disabled="disabled">Coming Soon...</a></li>
-            </ul>
-          </div>
-      </div>
-    </div>
-
+    <!-- Signout link for authentication - Adds implicit grant oauth -->
+    <px-oauth
+        site="site"
+        client-id="clientId"
+        redirect-uri="redirectUri">
+    </px-oauth>
 
     <!--[if lt IE 7]>
         <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
     <![endif]-->
 
     <div class="content container mainContentDiv" ng-view></div>
-
-    <div class="footer container" >
-      <footer class="flex flex--middle" role="contentinfo">
-          <div class="viewport">
-              <nav class="flex flex--right flex--middle" role="navigation">
-                  <ul class="list-inline" style="position:absolute">
-                      <li class="u-mh-">
-                          <a href="http://www.ge.com/privacy" target="_blank">Privacy</a>
-                      </li>
-                      <li class="u-mh-">
-                          <a href="http://www.ge.com/terms" target="_blank">Terms</a>
-                      </li>
-                  </ul>
-                  <small class="u-ml+ pull-right">©2015 General Electric</small>
-              </nav>
-          </div>
-      </footer>
-    </div>
   </div>
+
   <!-- In production use:
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
   -->

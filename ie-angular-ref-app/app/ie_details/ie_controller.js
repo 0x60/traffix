@@ -1,6 +1,4 @@
 app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, CurrentServices) {
-    $scope.welcomeText = 'Hackathon Users';
-
     var startingAsset = 1000000018;
     var numAssets = 12;
     $scope.assetNumbers = [];
