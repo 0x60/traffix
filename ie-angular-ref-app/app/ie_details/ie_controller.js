@@ -1,4 +1,9 @@
 app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, CurrentServices) {
+    initMap();
+    plotAccidents();
+    plotCameras();
+
+    // predix stuff
     var startingAsset = 1000000018;
     var numAssets = 12;
     $scope.assetNumbers = [];
