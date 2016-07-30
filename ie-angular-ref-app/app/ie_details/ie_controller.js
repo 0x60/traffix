@@ -4,11 +4,11 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
     var startingAsset = 1000000018;
     var numAssets = 12;
     $scope.assetNumbers = [];
+    $scope.trafficData = [];
+
     for(var i = 0; i < numAssets; i++){
       $scope.assetNumbers.push(startingAsset + i);
     }
-
-    console.log($scope.assetNumbers);
 
     // Whenever this controller is loaded, it will give a call to below method.
     fetchUAA();
@@ -24,9 +24,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
       }).then(function(){
         // populate the start time, end time and size to give calls to apis.
         var endTime = moment.now();
-        var startTime = moment(endTime).subtract(1, 'week').valueOf();
-        console.log(endTime);
-        console.log(startTime);
+        var startTime = moment(endTime).subtract(1, 'day').valueOf();
 
         $scope.getTrafficData(startTime, endTime, startingAsset);
         $scope.getPedestrianData(startTime, endTime);
@@ -43,7 +41,6 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
     * populates the response data in scope object.
     */
     $scope.getTrafficData = function(startTime, endTime, assetNumber) {
-      $scope.trafficData = [];
 
       CurrentServices.getTrafficData($scope.uaaToken, startTime, endTime, assetNumber).then(function(data){
         console.log(data);
@@ -72,8 +69,16 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
           }
         }
 
-        if(condition)
-          CurrentServices.getTrafficData($scope.uaaToken, startTime, endTime, assetNumber);
+        if(data._links["next-page"]) {
+          var url = data._links["next-page"]["href"];
+          var newStartTime = url.substring(url.indexOf("start-ts=") + 9, url.indexOf("&end-ts"));
+          var newEndTime = url.substring(url.indexOf("end-ts=") + 7, url.indexOf("&size"));
+          $scope.getTrafficData(newStartTime, newEndTime, assetNumber);
+        }
+        else{
+          return;
+        }
+          
 
       });
 
