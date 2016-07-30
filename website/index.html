@@ -36,64 +36,11 @@
                 <div id="navbar_city">
                     San Diego
                 </div>
-
-                <!-- Search Bar -->
-                <div id="search_input_container">
-                  <input
-                    id="search_input"
-                    type="text"
-                    >
-                </div>
-
-                <div id="navbar_pages">
-                    <ul>
-                        <li id="alert_dropdown"
-                            ng-init="alertsrc = icons.alert[0]"
-                            ng-mouseover="alertsrc = icons.alert[1]"
-                            ng-mouseout="alertsrc = icons.alert[0]">
-
-                            <img ng-src="{{alertsrc}}"/>
-                            <p>Alerts</p>
-                            <ul>
-                                <p>CURRENT INCIDENTS</p>
-                                <span ng-repeat="incident in current_incidents">
-                                    <li>{{incident.intersection}}</li>
-                                    <span ng-if="!$last"><hr /></span>
-                                </span>
-
-                            </ul>
-
-                        </li>
-                        <li id="hotspot_dropdown"
-                            ng-init="hotspotsrc = icons.hotspots[0]"
-                            ng-mouseover="hotspotsrc = icons.hotspots[1]"
-                            ng-mouseout="hotspotsrc = icons.hotspots[0]">
-
-                            <img ng-src="{{hotspotsrc}}"/>
-                            <p>Potential Hotspots</p>
-                            <ul>
-                                <p>POTENTIAL ACCIDENTS</p>
-                                <span ng-repeat="incident in current_incidents">
-                                    <li>{{incident.intersection}}</li>
-                                    <span ng-if="!$last"><hr /></span>
-                                </span>
-                            </ul>
-                        </li>
-
-                        <li ng-init="settingsrc = icons.settings[0]"
-                            ng-mouseover="settingsrc = icons.settings[1]"
-                            ng-mouseout="settingsrc = icons.settings[0]">
-
-                            <img ng-src="{{settingsrc}}"/>
-                            <p>Settings</p>
-                        </li>
-                    </ul>
-                </div>
             </nav>
 
             <!-- Content Here -->
-            <div class="panels graph" ng-if="showPanelGraph">Graphs</div>
-            <div class="panels stats" ng-if="showPanelStats">Stats</div>
+            <!-- <div class="panels graph" ng-if="showPanelGraph">Graphs</div>
+            <div class="panels stats" ng-if="showPanelStats">Stats</div> -->
 
             <div id='map'></div>
 
@@ -114,7 +61,6 @@
                             <input type="checkbox">Accidents</input>
                             <input type="checkbox">Potential Hotspots</input>
                         </div>
-                        <button ng-click="testFunction()">Test functionality</button>
                     </div>
 
                     <div id="panels" class="col-md-4">
