@@ -101,7 +101,7 @@ function add_accidents() {
 		// add to map
 		var myLayer = L.mapbox.featureLayer().setGeoJSON(geojson).addTo(map);
 	} );
-	/*
+
 	$.get( "assets/accidents_SanDiego.txt", function( data ) {
 		// get json
 		var data = JSON.parse( data );
@@ -121,7 +121,7 @@ function add_accidents() {
 				"properties": {
 					"title": "Accident at " + data[ i ].locationName,
 					"description": "LOCATION_PRETTY " + data[ i ].vehicles + " involved.",
-					"marker-color": "#3ca0d3",
+					"marker-color": "#ffa0d3",
 					"marker-size": "large",
 					"marker-symbol": "car"
 				}
@@ -131,5 +131,5 @@ function add_accidents() {
 		// add to map
 		var myLayer = L.mapbox.featureLayer().setGeoJSON(geojson).addTo(map);
 	} );
-	*/
+
 }
