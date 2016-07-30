@@ -75,8 +75,10 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
         if(data._links["next-page"]) {
           var url = data._links["next-page"]["href"];
           var newStartTime = url.substring(url.indexOf("start-ts=") + 9, url.indexOf("&end-ts"));
-          var newEndTime = url.substring(url.indexOf("end-ts=") + 7, url.indexOf("&size"));
-          $scope.getTrafficData(newStartTime, newEndTime, assetNumber);
+          if(newStartTime !== 0){
+            var newEndTime = url.substring(url.indexOf("end-ts=") + 7, url.indexOf("&size"));
+            $scope.getTrafficData(newStartTime, newEndTime, assetNumber);
+          }
         }
         else{
           return;
@@ -94,7 +96,6 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
     $scope.getPedestrianData = function(startTime, endTime, assetNumber) {
 
       CurrentServices.getPedestrianData($scope.uaaToken, startTime, endTime, assetNumber).then(function(data){
-        console.log(data);
         if(data && data._embedded && data._embedded.events && data._embedded.events.length > 0) {
           for(var i = 0; i < data._embedded.events.length; i++) {
             var event = data._embedded.events[i];
@@ -115,8 +116,10 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
           if(data._links["next-page"]) {
             var url = data._links["next-page"]["href"];
             var newStartTime = url.substring(url.indexOf("start-ts=") + 9, url.indexOf("&end-ts"));
-            var newEndTime = url.substring(url.indexOf("end-ts=") + 7, url.indexOf("&size"));
-            $scope.getPedestrianData(newStartTime, newEndTime, assetNumber);
+            if(newStartTime !== 0){
+              var newEndTime = url.substring(url.indexOf("end-ts=") + 7, url.indexOf("&size"));
+              $scope.getPedestrianData(newStartTime, newEndTime, assetNumber);
+            }
           }
         }
       });
@@ -130,6 +133,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
     $scope.getPublicSafetyData = function(startTime, endTime, size) {
       var publicSafetyData = {};
       CurrentServices.getPublicSafetyData($scope.uaaToken, startTime, endTime, size).then(function(data){
+        console.log(data);
         if(data && data._embedded && data._embedded.medias) {
             var eventsLen =  data._embedded.medias.length;
             for (var eventsIdx = 0; eventsIdx < eventsLen; eventsIdx++) {
