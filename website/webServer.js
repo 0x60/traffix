@@ -21,9 +21,9 @@ app.get('/', function (request, response) {
 });
 
 app.get('/test', function (req, res){
-
-	request('http://www.google.com', function (error, response, body) {
+	request('http://iamalexchang.com/neverlate/schools/1.json', function (error, response, body) {
 		if (!error && response.statusCode == 200) {
+			console.log(body);
 			res.status(200).send(body);
 		}
 	})

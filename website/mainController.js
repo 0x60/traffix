@@ -25,6 +25,7 @@ traffixApp.controller('MainController', ['$scope', '$rootScope', '$resource', '$
 								{'intersection':'Front St. & Beach St.'}];
 
 	// Panels
+	$scope.displayAccidents = false;
 	$scope.showPanelGraph = false;
 	$scope.showPanelStats = false;
 
@@ -32,6 +33,10 @@ traffixApp.controller('MainController', ['$scope', '$rootScope', '$resource', '$
 	//Functions need for this app
 	$scope.toTrustedHTML = function(html) {
         return $sce.trustAsHtml(html);
+    };
+
+    $scope.toggleAccidents = function(){
+    	$scope.displayAccidents = !$scope.displayAccidents;
     };
 
     $scope.testFunction = function(){
@@ -109,7 +114,7 @@ function add_accidents() {
 
 		// iterate through items
 		for( var i = 0; i < data.length; i++ ) {
-			console.log( data[ i ] );
+			// console.log( data[ i ] );
 
 			// create
 			geojson.push( {
