@@ -19,8 +19,9 @@ body {
 
 }
 .mainContentDiv {
-  padding:10px;
-  padding-bottom:80px;   /* Height of the footer */
+  padding: 0;
+  margin: 0;
+  width: 100%;
 }
 .bodyDiv {
   min-height:100%;
