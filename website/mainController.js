@@ -71,6 +71,37 @@ $(document).ready(function() {
 
 function add_accidents() {
 	// get request
+	$.get( "assets/sandiegocameras.json", function( data ) {
+		var data = data[ "_embedded" ][ "assets" ];
+		var geojson = [];
+
+		// iterate through items
+		for( var i = 0; i < data.length; i++ ) {
+			console.log( data[ i ] );
+
+			var co = data[ i ][ "coordinates" ][ "P1" ];
+
+			// create
+			geojson.push( {
+				"type": "Feature",
+				"geometry": {
+					"type": "Point",
+					"coordinates": co.split( "," ).reverse()
+				},
+				"properties": {
+					"title": "Accident at",
+					"description": "LOCATION_PRETTY ",
+					"marker-color": "#3ca0d3",
+					"marker-size": "large",
+					"marker-symbol": "car"
+				}
+			} );
+		}
+
+		// add to map
+		var myLayer = L.mapbox.featureLayer().setGeoJSON(geojson).addTo(map);
+	} );
+	/*
 	$.get( "assets/accidents_SanDiego.txt", function( data ) {
 		// get json
 		var data = JSON.parse( data );
@@ -100,5 +131,5 @@ function add_accidents() {
 		// add to map
 		var myLayer = L.mapbox.featureLayer().setGeoJSON(geojson).addTo(map);
 	} );
-
+	*/
 }
