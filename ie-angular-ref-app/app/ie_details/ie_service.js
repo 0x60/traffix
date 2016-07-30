@@ -59,13 +59,13 @@ app.service('CurrentServices', ['$http', '$q', function($http, $q) {
   * Below method will make a call to pedestrian api.
   * Users will have to create predix zone id for API calls as per the documentation.
   */
-  function getPedestrianData (uaaToken, startTime, endTime, size) {
+  function getPedestrianData (uaaToken, startTime, endTime, assetNumber) {
       var token = 'Bearer '+ uaaToken;
       // Your pedestrian api predix zone id.
       var pedestrianPredixZoneId = 'b160bde8-d2b9-4b58-b6df-c23babca1a49';
 
       // Pedestrian Events URL. This will be obtained from HATEOAS model.
-      var pedestrianEventsUrl = 'https://ie-pedestrian.run.aws-usw02-pr.ice.predix.io/v1/assets/1000000027/events';
+      var pedestrianEventsUrl = 'https://ie-pedestrian.run.aws-usw02-pr.ice.predix.io/v1/assets/' + assetNumber + '/events';
 
       var deferred = $q.defer();
 
@@ -73,7 +73,7 @@ app.service('CurrentServices', ['$http', '$q', function($http, $q) {
       $http({
             method: 'GET',
             url: pedestrianEventsUrl,
-            params: {'event-types':'SFIN,SFOUT', 'start-ts':startTime, 'end-ts':endTime, 'size':size},
+            params: {'event-types':'SFIN,SFOUT', 'start-ts':startTime, 'end-ts':endTime},
             headers: {'Authorization': token, 'Predix-Zone-Id': pedestrianPredixZoneId},
             timeout: 30000,
             cache: false
