@@ -51,6 +51,5 @@
 	imagejpeg( $image, $file );
 	imagedestroy( $image );
 	
-	return $file;
-
+	echo $file;
 	exit();
