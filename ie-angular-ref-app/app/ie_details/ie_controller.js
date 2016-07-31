@@ -17,7 +17,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
     // Whenever this controller is loaded, it will give a call to below method.
     fetchUAA();
 
-    //fetchPitney();
+    fetchPitney();
 
     /**
     * Below method will make a call to UAA Oauth Service and fetch the uaa token.
@@ -39,23 +39,6 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
         size = 200;
         $scope.getPublicSafetyData(startTime, endTime, startingAsset);
 
-      });
-    };
-
-    var sample_latitude = 34.59667;
-    var sample_longitude = -86.96556;
-    function fetchPitney() {
-      CurrentServices.getPitneyBowesToken().then(function(data){
-        $scope.pitneyToken = data['access_token'];
-      }).then(function(){
-        // populate the start time, end time and size to give calls to apis.
-        $scope.getAddress(sample_latitude, sample_longitude);
-      });
-    };
-
-    $scope.getAddress = function(latitude, longitude){
-      CurrentServices.getPitneyAddress($scope.pitneyToken, latitude, longitude).then(function(data){
-        console.log(data);
       });
     };
 
@@ -351,4 +334,21 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
        }
        return returnDirection;
      }
+
+    var sample_latitude = 34.59667;
+    var sample_longitude = -86.96556;
+    function fetchPitney() {
+      CurrentServices.getPitneyBowesToken().then(function(data){
+        $scope.pitneyToken = data['access_token'];
+        console.log($scope.pitneyToken);
+      }).then(function(){
+        $scope.getAddress(sample_latitude, sample_longitude);
+      });
+    };
+
+    $scope.getAddress = function(latitude, longitude){
+      CurrentServices.getPitneyAddress($scope.pitneyToken, latitude, longitude).then(function(data){
+        console.log(data);
+      });
+    };
 }]);

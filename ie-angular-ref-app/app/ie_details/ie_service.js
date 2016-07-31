@@ -379,7 +379,7 @@ app.service('CurrentServices', ['$http', '$q', function($http, $q) {
       method: 'POST',
       url: url,
       headers: {'Authorization': token, 'Content-Type': 'application/x-www-form-urlencoded'},
-      data: {'grant_type' : 'client_credentials'},
+      data: 'grant_type=client_credentials',
       timeout: 30000,
       cache: false
     })
@@ -390,6 +390,7 @@ app.service('CurrentServices', ['$http', '$q', function($http, $q) {
       deferred.reject(err);
     });
 
+    return deferred.promise;
   }
     //https://api.pitneybowes.com/location-intelligence/geoenhance/v1/address/bylocation?latitude=34.59667&longitude=-86.96556
 
@@ -400,7 +401,7 @@ app.service('CurrentServices', ['$http', '$q', function($http, $q) {
     var deferred = $q.defer();
 
     $http({
-      method: 'POST',
+      method: 'GET',
       url: url,
       headers: {'Authorization': token},
       timeout: 30000,
@@ -413,6 +414,7 @@ app.service('CurrentServices', ['$http', '$q', function($http, $q) {
       deferred.reject(err);
     });
 
+    return deferred.promise;
   }
 
   return {
