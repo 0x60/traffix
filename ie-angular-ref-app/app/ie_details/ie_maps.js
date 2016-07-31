@@ -37,7 +37,7 @@ function plotCameras() {
 					"description": "LOCATION_PRETTY ",
 					"marker-color": "#3ca0d3",
 					"marker-size": "large",
-					"marker-symbol": "car"
+					"marker-symbol": "camera"
 				}
 			} );
 		}
