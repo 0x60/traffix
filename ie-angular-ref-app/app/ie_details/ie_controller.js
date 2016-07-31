@@ -75,7 +75,6 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 
 		camerasLayer = L.mapbox.featureLayer().addTo( map );
 		accidentsLayer = L.mapbox.featureLayer().addTo( map );
-		pedestriansLayer = L.heatLayer( [], { maxZoom: 20, radius: 10 } ).addTo( map );
 
 		// disable zoom
 		map.touchZoom.disable();
@@ -645,21 +644,29 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 			// add to map
 			var temparray = [];
 
+			var maxcount = 0;
 			for( var i = 0; i < assetNumbers.length; i++ ) {
 				var assetnum = assetNumbers[ i ];
 				var count = pedestrianlocations.counts[ assetnum ];
+				if( count > maxcount ) maxcount = count;
+			}
+
+			for( var i = 0; i < assetNumbers.length; i++ ) {
+				var assetnum = assetNumbers[ i ];
+				var count = pedestrianlocations.counts[ assetnum ];
+
 				if( count >= 0 ) {
 					// only work on counts > 0
 					var lat = assetMapping[ assetnum ][ 0 ];
 					var lng = assetMapping[ assetnum ][ 1 ];
 
-					for( var j = count; j > 0; j-- ) {
-						temparray.push( L.latLng( lat, lng ) );
-					}
+					temparray.push( [ lat, lng, count / maxcount ] );
 				}
 			}
 
-			pedestriansLayer.setLatLngs( temparray );
+			console.log( temparray );
+
+			pedestriansLayer = L.heatLayer( temparray, { maxZoom: 20, radius: 10 } ).addTo( map );
 
 			// stop checking
 			clearInterval( pedestrianlocations.timer );
