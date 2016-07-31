@@ -1,4 +1,6 @@
 <?php
+	error_reporting( E_ALL );
+	ini_set( 'display_errors', 1 );
 	// reverse proxy for calls that don't work
 	// params: URL, Authorization, Predix-Zone-Id
 	/*
@@ -17,10 +19,15 @@
 		Pragma:no-cache
 	*/
 
-	$headers = getallheaders();
 	$request_url = $_GET[ "url" ];
-	$auth = $headers[ "Authorization" ];
-	$pzi = $headers[ "Predix-Zone-Id" ];
+	$auth = $_SERVER[ "HTTP_Authorization" ];
+	$pzi = $_SERVER[ "HTTP_Predix_Zone_Id" ];
+
+	// get file data
+	preg_match( '/.+\/(.+)/', $request_url, $matches );
+	$filename = 'images/' . $matches[ 1 ] . '.jpg';
+	$fp = fopen( dirname(__FILE__) . '/' . $filename, 'w+' );
+
 
 	// curl get
 	$request_headers = array(
@@ -35,8 +42,13 @@
 	curl_setopt( $ch, CURLOPT_URL, $request_url ); 
 	curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
 	curl_setopt( $ch, CURLOPT_HTTPHEADER, $request_headers );
-	$response = curl_exec( $ch );
+	curl_setopt( $ch, CURLOPT_FILE, $fp );
+	curl_setopt( $ch, CURLOPT_FOLLOWLOCATION, true );
+	curl_exec( $ch );
 	curl_close( $ch );
+
+	// close file
+	fclose( $fp );
 
 	// output
 	header( "Content-Type: text/plain" );
@@ -44,12 +56,4 @@
 	header( "Access-Control-Allow-Origin: https://traffix.run.aws-usw02-pr.ice.predix.io" );
 
 	// get name
-	preg_match('/.+\/(.+)/', $request_url, $matches);
-
-	$file = 'images/' . $matches[ 1 ] . '.jpg';
-	$image = imagecreatefromstring( $response );
-	imagejpeg( $image, $file );
-	imagedestroy( $image );
-	
-	echo $file;
-	exit();
+	echo $filename;
