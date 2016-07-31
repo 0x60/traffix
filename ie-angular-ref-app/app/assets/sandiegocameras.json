@@ -1,6 +1,7 @@
 {
 	"_embedded": {
 		"assets": [{
+			"asset-number": "1000000018",
 			"coordinates": {
 				"P1": "32.711653,-117.157314"
 			},
@@ -26,6 +27,7 @@
 			"media-type": "IMAGE",
 			"device-type": "DATASIM"
 		}, {
+			"asset-number": "1000000019",
 			"coordinates": {
 				"P1": "32.712668,-117.157546"
 			},
@@ -51,6 +53,7 @@
 			"media-type": "IMAGE",
 			"device-type": "DATASIM"
 		}, {
+			"asset-number": "1000000020",
 			"coordinates": {
 				"P1": "32.711664,-117.156404"
 			},
@@ -76,6 +79,7 @@
 			"media-type": "IMAGE",
 			"device-type": "DATASIM"
 		}, {
+			"asset-number": "1000000021",
 			"coordinates": {
 				"P1": "32.712514,-117.158185"
 			},
@@ -101,6 +105,7 @@
 			"media-type": "IMAGE",
 			"device-type": "DATASIM"
 		}, {
+			"asset-number": "1000000022",
 			"coordinates": {
 				"P1": "32.712695,-117.157313"
 			},
@@ -126,6 +131,7 @@
 			"media-type": "IMAGE",
 			"device-type": "DATASIM"
 		}, {
+			"asset-number": "1000000023",
 			"coordinates": {
 				"P1": "32.712513,-117.157283"
 			},
@@ -151,6 +157,7 @@
 			"media-type": "IMAGE",
 			"device-type": "DATASIM"
 		}, {
+			"asset-number": "1000000024",
 			"coordinates": {
 				"P1": "32.712471,-117.158423"
 			},
@@ -176,6 +183,7 @@
 			"media-type": "IMAGE",
 			"device-type": "DATASIM"
 		}, {
+			"asset-number": "1000000025",
 			"coordinates": {
 				"P1": "32.711628,-117.156618"
 			},
@@ -201,6 +209,7 @@
 			"media-type": "IMAGE",
 			"device-type": "DATASIM"
 		}, {
+			"asset-number": "1000000026",
 			"coordinates": {
 				"P1": "32.711421,-117.157264"
 			},
@@ -226,6 +235,7 @@
 			"media-type": "IMAGE",
 			"device-type": "DATASIM"
 		}, {
+			"asset-number": "1000000027",
 			"coordinates": {
 				"P1": "32.713758,-117.155512"
 			},
@@ -251,6 +261,7 @@
 			"media-type": "IMAGE,VIDEO,AUDIO",
 			"device-type": "DATASIM"
 		}, {
+			"asset-number": "1000000028",
 			"coordinates": {
 				"P1": "32.713765,-117.156406"
 			},
@@ -276,6 +287,7 @@
 			"media-type": "IMAGE,VIDEO,AUDIO",
 			"device-type": "DATASIM"
 		}, {
+			"asset-number": "1000000029",
 			"coordinates": {
 				"P1": "32.713744,-117.157333"
 			},
