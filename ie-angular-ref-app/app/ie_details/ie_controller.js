@@ -589,22 +589,19 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 		});
 	}
 
-  $scope.toggleCameraState = function(cameraStatus){
-    if(!cameraStatus){
-      map.removeLayer(camerasLayer);
-    }
-    else{
-      map.addLayer(camerasLayer);
-    }
-  }
+	$scope.toggleCameraState = function(cameraStatus){
+		if( ! cameraStatus ) {
+			map.removeLayer( camerasLayer );
+		} else {
+			map.addLayer( camerasLayer );
+		}
+	}
 
-  $scope.toggleAccidentState = function(accidentStatus){
-    if(!accidentStatus){
-      map.removeLayer(accidentsLayer);
-    }
-    else{
-      map.addLayer(accidentsLayer);
-    }
-  }
-
+	$scope.toggleAccidentState = function(accidentStatus){
+		if( ! accidentStatus ) {
+			map.removeLayer( accidentsLayer );
+		} else {
+			map.addLayer( accidentsLayer );
+		}
+	}
 }]);
