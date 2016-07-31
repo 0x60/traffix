@@ -155,16 +155,18 @@ app.service('CurrentServices', ['$http', '$q', function($http, $q) {
   * Users will have to create predix zone id for API calls as per the documentation.
   */
   function getImage (uaaToken, imageUrl) {
-      var token = 'Bearer '+uaaToken;
+      var token = 'Bearer ' + uaaToken;
 
       // Your image api predix zone id.
       var imagePredixZoneId = 'c75697cb-873c-4ebb-abeb-9c6c9ecd3fc7';
       var deferred = $q.defer();
 
+      var newImageUrl = "https://iamalexchang.com/examples/traffix/proxy.php?url=" + encodeURIComponent( imageUrl );
+
       // Ajax call to media api.
       $http({
             method: 'GET',
-            url: imageUrl,
+            url: newImageUrl,
             headers: {'Authorization': token, 'Predix-Zone-Id': imagePredixZoneId},
             timeout: 30000,
             cache: false
