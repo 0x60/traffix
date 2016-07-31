@@ -25,13 +25,17 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 		geojson: [],
 		counter: 0,
 		timer: undefined,
-		imageCounter: 0
+		imageCounter: 0,
+		removeFromMap: function() { map.removeLayer( camerasLayer ); },
+		addToMap: function() { camerasLayer.addTo( map ); },
 	};
 
 	var accidentslocations = {
 		geojson: [],
 		counter: 0,
-		timer: undefined
+		timer: undefined,
+		removeFromMap: function() { map.removeLayer( accidentsLayer ); },
+		addToMap: function() { accidentsLayer.addTo( map ); },
 	};
 
 	var footerHeight = 100;
