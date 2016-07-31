@@ -9,6 +9,8 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
     $scope.assetNumbers = [];
     $scope.trafficData = [];
     $scope.pedestrianData = [];
+    $scope.arrayOfCoord = [{"latitude": 34.59667, "longitude": -86.96556}];
+    $scope.arrayOfAddress = [];
 
     for(var i = 0; i < numAssets; i++){
       $scope.assetNumbers.push(startingAsset + i);
@@ -335,20 +337,23 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
        return returnDirection;
      }
 
-    var sample_latitude = 34.59667;
-    var sample_longitude = -86.96556;
-    function fetchPitney() {
+    function fetchPitney(arrayCoord) {
       CurrentServices.getPitneyBowesToken().then(function(data){
         $scope.pitneyToken = data['access_token'];
         console.log($scope.pitneyToken);
       }).then(function(){
-        $scope.getAddress(sample_latitude, sample_longitude);
+        for(var i = 0; i < arrayCoord.length; i++){
+          var location = arrayCoord[i];
+          arrayOfAddress.push($scope.getAddress(location.latitude, location.longitude));
+        }
       });
     };
 
     $scope.getAddress = function(latitude, longitude){
       CurrentServices.getPitneyAddress($scope.pitneyToken, latitude, longitude).then(function(data){
-        console.log(data);
+        var address = data.location[0].address;
+        console.log(address);
+        return {'mainAddress': address.mainAddressLine, 'cityStateZip': address.addressLastLine};
       });
     };
 }]);
