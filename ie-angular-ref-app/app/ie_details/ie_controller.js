@@ -1,7 +1,8 @@
 app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, CurrentServices) {
-    initMap();
-    plotAccidents();
-    plotCameras();
+    $( document ).ready( function() {
+      initMap();
+      getPitneyTokenAndPlot();
+    } );
 
     // predix stuff
     var startingAsset = 1000000018;
@@ -9,17 +10,106 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
     $scope.assetNumbers = [];
     $scope.trafficData = [];
     $scope.pedestrianData = [];
-    $scope.arrayOfCoord = [{"latitude": 34.59667, "longitude": -86.96556}];
-    $scope.arrayOfAddress = [];
 
     for(var i = 0; i < numAssets; i++){
       $scope.assetNumbers.push(startingAsset + i);
     }
 
+    // map stuff
+    var map;
+    var footerHeight = 100;
+
+    function initMap() {
+      // make map height of screen
+      document.getElementById("map").style.height = ( window.innerHeight - footerHeight ) + "px";
+
+      // init map
+      L.mapbox.accessToken = 'pk.eyJ1IjoidHVuZ2FsYmVydDk5IiwiYSI6ImNpcXhkbGplbTAxZnhmdm1nMjkycnE5ZjYifQ.nPjdhFFlu1agC8JmquUkkw';
+
+      map = L.mapbox.map('map')
+      .setView([32.7157, -117.1611], 13);
+
+      L.tileLayer('https://api.mapbox.com/styles/v1/tungalbert99/ciqxdskwv0007c4ktiubhssd4/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoidHVuZ2FsYmVydDk5IiwiYSI6ImNpcXhkbGplbTAxZnhmdm1nMjkycnE5ZjYifQ.nPjdhFFlu1agC8JmquUkkw').addTo(map);
+
+      console.log( "Map Initialized." );
+    }
+
+    function plotCameras() {
+      console.log( "Plotting Cameras" );
+
+      // get request
+      $.get( "assets/sandiegocameras.json", function( data ) {
+        var data = data[ "_embedded" ][ "assets" ];
+        var geojson = [];
+
+        // iterate through items
+        for( var i = 0; i < data.length; i++ ) {
+
+          var co = data[ i ][ "coordinates" ][ "P1" ];
+          co = co.split( "," ).reverse();
+          var prettyAddr = $scope.getAddress( co[ 1 ], co[ 0 ] );
+          prettyAddr = prettyAddr.mainAddress + " " + prettyAddr.cityStateZip;
+
+          // create
+          geojson.push( {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": co
+            },
+            "properties": {
+              "title": "Accident at",
+              "description": prettyAddr,
+              "marker-color": "#3ca0d3",
+              "marker-size": "large",
+              "marker-symbol": "camera"
+            }
+          } );
+        }
+
+        // add to map
+        var myLayer = L.mapbox.featureLayer().setGeoJSON(geojson).addTo(map);
+      } );
+    }
+
+    function plotAccidents() {
+      console.log( "Plotting Accidents" );
+      $.get( "assets/accidents_SanDiego.txt", function( data ) {
+        // get json
+        var data = JSON.parse( data );
+        var geojson = [];
+
+        // iterate through items
+        for( var i = 0; i < data.length; i++ ) {
+
+          var prettyAddr = $scope.getAddress( data[ i ].location[ 0 ], data[ i ].location[ 1 ] );
+          prettyAddr = prettyAddr.mainAddress + " " + prettyAddr.cityStateZip;
+
+          // create
+          geojson.push( {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [ data[ i ].location[ 1 ], data[ i ].location[ 0 ]]
+            },
+            "properties": {
+              "title": "Accident at " + data[ i ].locationName,
+              "description": prettyAddr + "\n " + data[ i ].vehicles + " involved.",
+              "marker-color": "#ffa0d3",
+              "marker-size": "large",
+              "marker-symbol": "car"
+            }
+          } );
+        }
+
+        // add to map
+        var myLayer = L.mapbox.featureLayer().setGeoJSON(geojson).addTo(map);
+      } );
+
+    }
+
     // Whenever this controller is loaded, it will give a call to below method.
     fetchUAA();
-
-    fetchPitney($scope.arrayOfCoord);
 
     /**
     * Below method will make a call to UAA Oauth Service and fetch the uaa token.
@@ -336,6 +426,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
        return returnDirection;
      }
 
+    /*
     function fetchPitney(arrayCoord) {
       CurrentServices.getPitneyBowesToken().then(function(data){
         $scope.pitneyToken = data['access_token'];
@@ -346,10 +437,24 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
         }
       });
     };
+    */
+
+    function getPitneyTokenAndPlot() {
+      CurrentServices.getPitneyBowesToken().then(function(data){
+        $scope.pitneyToken = data['access_token'];
+      }).then(function(){
+          plotAccidents();
+          plotCameras();
+      });
+    }
 
     $scope.getAddress = function(latitude, longitude){
+      var t = (new Date()).getTime();
+
+      console.log( "started: " + t );
       CurrentServices.getPitneyAddress($scope.pitneyToken, latitude, longitude).then(function(data){
         var address = data.location[0].address;
+        console.log( "finished: " + t );
         return {'mainAddress': address.mainAddressLine, 'cityStateZip': address.addressLastLine};
       });
     };
