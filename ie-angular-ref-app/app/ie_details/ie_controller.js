@@ -49,6 +49,12 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 		camerasLayer = L.mapbox.featureLayer().addTo( map );
 		accidentsLayer = L.mapbox.featureLayer().addTo( map );
 
+		// disable zoom
+		map.touchZoom.disable();
+		map.doubleClickZoom.disable();
+		map.scrollWheelZoom.disable();
+		map.keyboard.disable();
+
 		console.log( "Map Initialized." );
 	}
 
