@@ -7,35 +7,58 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 	// predix stuff
 	var startingAsset = 1000000018;
 	var numAssets = 12;
-	$scope.assetNumbers = [];
+
+	//
+	var assetNumbers = [];
 	$scope.trafficData = [];
 	$scope.pedestrianData = [];
+	var timerLimit = 1000;
+
+	// TODO: make this dynamic
+	var assetMapping = {
+		"1000000018": [ 32.711653, -117.157314 ],
+		"1000000019": [ 32.712668, -117.157546 ],
+		"1000000020": [ 32.711664, -117.156404 ],
+		"1000000021": [ 32.712514, -117.158185 ],
+		"1000000022": [ 32.712695, -117.157313 ],
+		"1000000023": [ 32.712513, -117.157283 ],
+		"1000000024": [ 32.712471, -117.158423 ],
+		"1000000025": [ 32.711628, -117.156618 ],
+		"1000000026": [ 32.711421, -117.157264 ],
+		"1000000027": [ 32.713758, -117.155512 ],
+		"1000000028": [ 32.713765, -117.156406 ],
+		"1000000029": [ 32.713744, -117.157333 ]
+	};
 
 	// generate asset numbers
 	for(var i = 0; i < numAssets; i++){
-		$scope.assetNumbers.push(startingAsset + i);
+		assetNumbers.push(startingAsset + i);
 	}
 
 	// map stuff
 	var map;
+
 	var camerasLayer;
 	var accidentsLayer;
+	var pedestriansLayer;
+
+	var pedestrianlocations = {
+		counts: {},
+		processed: 0,
+		timer: undefined
+	}
 
 	var cameralocations = {
 		geojson: [],
 		counter: 0,
 		timer: undefined,
-		imageCounter: 0,
-		removeFromMap: function() { map.removeLayer( camerasLayer ); },
-		addToMap: function() { camerasLayer.addTo( map ); },
+		imageCounter: 0
 	};
 
 	var accidentslocations = {
 		geojson: [],
 		counter: 0,
-		timer: undefined,
-		removeFromMap: function() { map.removeLayer( accidentsLayer ); },
-		addToMap: function() { accidentsLayer.addTo( map ); },
+		timer: undefined
 	};
 
 	var footerHeight = 100;
@@ -52,6 +75,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 
 		camerasLayer = L.mapbox.featureLayer().addTo( map );
 		accidentsLayer = L.mapbox.featureLayer().addTo( map );
+		pedestriansLayer = L.heatLayer( [], { maxZoom: 20, radius: 10 } ).addTo( map );
 
 		// disable zoom
 		map.touchZoom.disable();
@@ -100,7 +124,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 			$scope.getCameraAddress();
 			$scope.getCameraImage();
 
-			cameralocations.timer = setInterval( checkCameraGeoJsonDone, 500 );
+			cameralocations.timer = setInterval( checkCameraGeoJsonDone, timerLimit );
 		} );
 	}
 
@@ -135,7 +159,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 
 			$scope.getAccidentsAddress();
 
-			accidentslocations.timer = setInterval( checkAccidentsGeoJsonDone, 500 );
+			accidentslocations.timer = setInterval( checkAccidentsGeoJsonDone, timerLimit );
 		} );
 
 	}
@@ -154,15 +178,20 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 		}).then(function(){
 			// populate the start time, end time and size to give calls to apis.
 			var endTime = moment.now();
-			var startTime = moment(endTime).subtract(1, 'week').valueOf();
+			var startTime = moment(endTime).subtract(12, 'hour').valueOf();
 			$scope.endTime = endTime;
 			$scope.startTime = startTime;
 
+			// get traffic data
 			$scope.getTrafficData(startTime, endTime, startingAsset);
 
-      for(var i = 0; i < $scope.assetNumbers.length; i++){
-        $scope.getPedestrianData(startTime, endTime, $scope.assetNumbers[i]);
-      }
+			// get pedestrian data
+			for(var i = 0; i < assetNumbers.length; i++){
+				pedestrianlocations.counts[ assetNumbers[ i ] ] = 0;
+				pedestrianlocations.processed++;
+				$scope.getPedestrianData( startTime, endTime, assetNumbers[ i ] );
+			}
+			pedestrianlocations.timer = setInterval( checkPedestriansProcessed, timerLimit );
 			
 			// change the size for parking and public safety calls.
 			size = 200;
@@ -224,45 +253,42 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 	* Below method will make a call to pedestrian event Service and
 	* populates the response data in scope object.
 	*/
-	$scope.getPedestrianData = function(startTime, endTime, assetNumber) {
-
-    var countPedestrians = 0;
-
-		CurrentServices.getPedestrianData($scope.uaaToken, startTime, endTime, assetNumber).then(function(data){
-			if(data && data._embedded && data._embedded.events && data._embedded.events.length > 0) {
-				for(var i = 0; i < data._embedded.events.length; i++) {
+	$scope.getPedestrianData = function( startTime, endTime, assetNumber ) {
+	    var countPedestrians = 0;
+		CurrentServices.getPedestrianData( $scope.uaaToken, startTime, endTime, assetNumber ).then( function( data ) {
+			if( data && data._embedded && data._embedded.events && data._embedded.events.length > 0 ) {
+				for( var i = 0; i < data._embedded.events.length; i++ ) {
 					var event = data._embedded.events[i];
 					var objectData = {};
-					objectData.time = moment(event.timestamp).format('MMM Do YYYY, h:mm:ss a');
-					objectData['location'] = event['location-uid'];
-					if(event && event.measures && event.measures.length > 0) {
-						var measure = event.measures[0];
-
-						if(measure.tag && measure.tag === 'SFCNT') {
+					objectData.time = moment( event.timestamp ).format( 'MMM Do YYYY, h:mm:ss a' );
+					objectData[ 'location' ] = event[ 'location-uid' ];
+					if( event && event.measures && event.measures.length > 0 ) {
+						var measure = event.measures[ 0 ];
+						if( measure.tag && measure.tag === 'SFCNT' ) {
 							objectData.count = measure.value;
-              countPedestrians += objectData.count;
+							countPedestrians += objectData.count;
 						}
 					}
-
-					// $scope.pedestrianData.push(objectData);
 				}
 
-				if(data._links["next-page"]) {
-					var url = data._links["next-page"]["href"];
-					var newStartTime = url.substring(url.indexOf("start-ts=") + 9, url.indexOf("&end-ts"));
-					if(newStartTime !== 0){
-						var newEndTime = url.substring(url.indexOf("end-ts=") + 7, url.indexOf("&size"));
-						$scope.getPedestrianData(newStartTime, newEndTime, assetNumber);
+				if( data._links[ "next-page" ] ) {
+					var url = data._links[ "next-page" ][ "href" ];
+					var newStartTime = url.substring( url.indexOf( "start-ts=" ) + 9, url.indexOf( "&end-ts" ) );
+					if( newStartTime != 0 ) {
+						var newEndTime = url.substring( url.indexOf( "end-ts=" ) + 7, url.indexOf( "&size" ) );
+						$scope.getPedestrianData( newStartTime, newEndTime, assetNumber );
+						pedestrianlocations.processed++;
 					}
-          else{
-             $scope.pedestrianData.push({assetNumber: countPedestrians});
-          }
 				}
 			}
-		});
 
-    
-
+			// update count
+			pedestrianlocations.counts[ assetNumber ] = countPedestrians;
+			pedestrianlocations.processed--;
+		}, function( err ) {
+			// something went wrong
+			pedestrianlocations.processed--;
+		} );
 	};
 
 	/**
@@ -473,7 +499,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 	}
 
 	function checkCameraGeoJsonDone() {
-		if( cameralocations.counter == 0 && cameralocations.imageCounter == 0 ) {
+		if( cameralocations.counter <= 0 && cameralocations.imageCounter <= 0 ) {
 			// add to map
 			camerasLayer.on( 'layeradd', function( e ) {
 				var marker = e.layer,
@@ -494,7 +520,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 	}
 
 	function checkAccidentsGeoJsonDone() {
-		if( accidentslocations.counter == 0 ) {
+		if( accidentslocations.counter <= 0 ) {
 			// add to map
 			accidentsLayer.on( 'layeradd', function( e ) {
 				var marker = e.layer,
@@ -516,9 +542,8 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 		cameralocations.geojson.forEach( function( listItem, index ) {
 			var latitude = listItem.geometry.coordinates[ 1 ];
 			var longitude = listItem.geometry.coordinates[ 0 ];
-			console.log( "getting camera: " + index );
+
 			CurrentServices.getPitneyAddress( $scope.pitneyToken, latitude, longitude ).then( function( data ) {
-				console.log( "finished camera: " + index );
 				var address = data.location[ 0 ].address;
 				cameralocations.geojson[ index ].properties.address = address.formattedAddress;
 				cameralocations.counter--;
@@ -535,7 +560,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 			var eTime = $scope.endTime;
 			var aNumber = listItem.properties.assetnumber;
 
-			console.log( "getting camera image: " + index + " asset: " + aNumber );
+
 
 			var imageURL;
 
@@ -558,16 +583,13 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 
 					// get image from our reverse proxy
 					CurrentServices.getImage( $scope.uaaToken, imageURL ).then( function( data ) {
-						console.log( "finished camera image: " + index );
 						cameralocations.imageCounter--;
 						cameralocations.geojson[ index ].properties.image = data;
 					}, function( err ) {
-						console.log( "finished camera image: " + index + " no image" );
 						cameralocations.imageCounter--;
 					} );
 				} else {
 					// no camera data
-					console.log( "finished camera image: " + index + " no image" );
 					cameralocations.imageCounter--;
 				}
 			});
@@ -578,9 +600,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 		accidentslocations.geojson.forEach( function( listItem, index ) {
 			var latitude = listItem.geometry.coordinates[ 1 ];
 			var longitude = listItem.geometry.coordinates[ 0 ];
-			console.log( "getting accidents: " + index );
 			CurrentServices.getPitneyAddress( $scope.pitneyToken, latitude, longitude ).then( function( data ) {
-				console.log( "finished accidents: " + index );
 				var address = data.location[ 0 ].address;
 				accidentslocations.geojson[ index ].properties.address = address.formattedAddress;
 				accidentslocations.counter--;
@@ -613,6 +633,46 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 			map.removeLayer( accidentsLayer );
 		} else {
 			map.addLayer( accidentsLayer );
+		}
+	}
+
+	/**
+	 * Heatmap Stuff
+	 */
+
+	function checkPedestriansProcessed() {
+		if( pedestrianlocations.processed <= 0 ) {
+			// add to map
+			var temparray = [];
+
+			for( var i = 0; i < assetNumbers.length; i++ ) {
+				var assetnum = assetNumbers[ i ];
+				var count = pedestrianlocations.counts[ assetnum ];
+				if( count >= 0 ) {
+					// only work on counts > 0
+					var lat = assetMapping[ assetnum ][ 0 ];
+					var lng = assetMapping[ assetnum ][ 1 ];
+
+					for( var j = count; j > 0; j-- ) {
+						temparray.push( L.latLng( lat, lng ) );
+					}
+				}
+			}
+
+			pedestriansLayer.setLatLngs( temparray );
+
+			// stop checking
+			clearInterval( pedestrianlocations.timer );
+		} else {
+			console.log( "pedestrian locations left: " + pedestrianlocations.processed );
+		}
+	}
+
+	$scope.togglePedestrianState = function( pedestrianStatus ){
+		if( ! pedestrianStatus ) {
+			map.removeLayer( pedestriansLayer );
+		} else {
+			map.addLayer( pedestriansLayer );
 		}
 	}
 }]);
