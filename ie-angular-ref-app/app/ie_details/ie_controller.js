@@ -19,6 +19,13 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
     var map;
     var camerasLayer;
     var accidentsLayer;
+
+    var cameralocations = {
+      geojson: [],
+      counter: 0,
+      timer: undefined
+    };
+
     var footerHeight = 100;
 
     function initMap() {
@@ -43,18 +50,15 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
       // get request
       $.get( "assets/sandiegocameras.json", function( data ) {
         var data = data[ "_embedded" ][ "assets" ];
-        var geojson = [];
 
         // iterate through items
         for( var i = 0; i < data.length; i++ ) {
 
           var co = data[ i ][ "coordinates" ][ "P1" ];
           co = co.split( "," ).reverse();
-          var prettyAddr = $scope.getAddress( co[ 1 ], co[ 0 ] );
-          prettyAddr = prettyAddr.mainAddress + " " + prettyAddr.cityStateZip;
 
           // create
-          geojson.push( {
+          cameralocations.geojson.push( {
             "type": "Feature",
             "geometry": {
               "type": "Point",
@@ -62,15 +66,22 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
             },
             "properties": {
               "title": "Accident at",
-              "description": prettyAddr,
+              "description": "",
               "marker-color": "#3ca0d3",
               "marker-size": "large",
               "marker-symbol": "camera"
             }
           } );
+
+          cameralocations.counter++;
         }
 
+        $scope.getCameraAddress();
+
+        cameralocations.timer = setInterval( checkCameraGeoJsonDone, 500 );
+
         // add to map
+        // camerasLayer.setGeoJSON( geojson );
       } );
     }
 
@@ -105,6 +116,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
         }
 
         // add to map
+        accidentsLayer.setGeoJSON( geojson );
       } );
 
     }
@@ -425,38 +437,40 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
          }
        }
        return returnDirection;
-     }
+    }
 
-    /*
-    function fetchPitney(arrayCoord) {
-      CurrentServices.getPitneyBowesToken().then(function(data){
-        $scope.pitneyToken = data['access_token'];
-      }).then(function(){
-        for(var i = 0; i < arrayCoord.length; i++){
-          var location = arrayCoord[i];
-          $scope.arrayOfAddress.push($scope.getAddress(location.latitude, location.longitude));
-        }
-      });
-    };
-    */
+    function checkCameraGeoJsonDone() {
+      if( cameralocations.counter == 0 ) {
+        // add to map
+        camerasLayer.setGeoJSON( cameralocations.geojson );
+
+        // stop checking
+        clearInterval( cameralocations.timer );
+      } else {
+        console.log( "cameras left: " + cameralocations.counter );
+      }
+    }
+
+    $scope.getCameraAddress = function() {
+      cameralocations.geojson.forEach( function( listItem, index ) {
+        var latitude = listItem.geometry.coordinates[ 1 ];
+        var longitude = listItem.geometry.coordinates[ 0 ];
+        console.log( "getting camera: " + index );
+        CurrentServices.getPitneyAddress( $scope.pitneyToken, latitude, longitude ).then( function( data ) {
+          console.log( "finished camera: " + index );
+          var address = data.location[ 0 ].address;
+          cameralocations.geojson[ index ].properties.address = address.formattedAddress;
+          cameralocations.counter--;
+        });
+      } );
+    };
 
     function getPitneyTokenAndPlot() {
       CurrentServices.getPitneyBowesToken().then(function(data){
         $scope.pitneyToken = data['access_token'];
       }).then(function(){
-          plotAccidents();
+          // plotAccidents();
           plotCameras();
       });
     }
-
-    $scope.getAddress = function(latitude, longitude){
-      var t = (new Date()).getTime();
-
-      console.log( "started: " + t );
-      CurrentServices.getPitneyAddress($scope.pitneyToken, latitude, longitude).then(function(data){
-        var address = data.location[0].address;
-        console.log( "finished: " + t );
-        return {'mainAddress': address.mainAddressLine, 'cityStateZip': address.addressLastLine};
-      });
-    };
 }]);
