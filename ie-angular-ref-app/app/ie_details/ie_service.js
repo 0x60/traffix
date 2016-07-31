@@ -161,10 +161,12 @@ app.service('CurrentServices', ['$http', '$q', function($http, $q) {
       var imagePredixZoneId = 'c75697cb-873c-4ebb-abeb-9c6c9ecd3fc7';
       var deferred = $q.defer();
 
+      var newImageUrl = "proxy.php?url=" + encodeURIComponent( imageUrl );
+
       // Ajax call to media api.
       $http({
             method: 'GET',
-            url: imageUrl,
+            url: newImageUrl,
             headers: {'Authorization': token, 'Predix-Zone-Id': imagePredixZoneId},
             timeout: 30000,
             cache: false
