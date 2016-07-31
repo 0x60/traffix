@@ -161,7 +161,7 @@ app.service('CurrentServices', ['$http', '$q', function($http, $q) {
       var imagePredixZoneId = 'c75697cb-873c-4ebb-abeb-9c6c9ecd3fc7';
       var deferred = $q.defer();
 
-      var newImageUrl = "https://iamalexchang.com/examples/traffix/proxy.php?url=" + encodeURIComponent( imageUrl );
+      var newImageUrl = "proxy.php?url=" + encodeURIComponent( imageUrl );
 
       // Ajax call to media api.
       $http({
@@ -368,7 +368,7 @@ app.service('CurrentServices', ['$http', '$q', function($http, $q) {
       return deferred.promise;
   }
 
-  function getPitneyBowesToken (){
+  function getPitneyBowesToken() {
     var token = 'Basic ' + 'ZVdsZllKVVVtWnVpYTd2QWNZOGUxSllrd0FjV2xmZjQ6V3RyQTN5VHVmQUs5Z2x0bA==';
 
     var url = 'https://api.pitneybowes.com/oauth/token';
@@ -379,7 +379,30 @@ app.service('CurrentServices', ['$http', '$q', function($http, $q) {
       method: 'POST',
       url: url,
       headers: {'Authorization': token, 'Content-Type': 'application/x-www-form-urlencoded'},
-      data: {'grant_type=client_credentials'},
+      data: {'grant_type' : 'client_credentials'},
+      timeout: 30000,
+      cache: false
+    })
+    .success(function(data){
+      deferred.resolve(data);
+    })
+    .error(function(err){
+      deferred.reject(err);
+    });
+
+  }
+    //https://api.pitneybowes.com/location-intelligence/geoenhance/v1/address/bylocation?latitude=34.59667&longitude=-86.96556
+
+  function getPitneyAddress(pitneyToken, latitude, longitude){
+    var url = 'https://api.pitneybowes.com/location-intelligence/geoenhance/v1/address/bylocation?latitude=' + latitude + "&longitude=" + longitude;
+
+    var token = 'Bearer ' + pitneyToken;
+    var deferred = $q.defer();
+
+    $http({
+      method: 'POST',
+      url: url,
+      headers: {'Authorization': token},
       timeout: 30000,
       cache: false
     })
@@ -405,6 +428,7 @@ app.service('CurrentServices', ['$http', '$q', function($http, $q) {
     getHistoricalPath: getHistoricalPath,
     getHistoricalPosition: getHistoricalPosition,
     getHistoricalDwellTime: getHistoricalDwellTime,
-    getPitneyBowesToken: getPitneyBowesToken
+    getPitneyBowesToken: getPitneyBowesToken,
+    getPitneyAddress: getPitneyAddress
   };
 }]);
