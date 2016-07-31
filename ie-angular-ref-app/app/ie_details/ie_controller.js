@@ -17,6 +17,8 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 
     // map stuff
     var map;
+    var camerasLayer;
+    var accidentsLayer;
     var footerHeight = 100;
 
     function initMap() {
@@ -26,10 +28,11 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
       // init map
       L.mapbox.accessToken = 'pk.eyJ1IjoidHVuZ2FsYmVydDk5IiwiYSI6ImNpcXhkbGplbTAxZnhmdm1nMjkycnE5ZjYifQ.nPjdhFFlu1agC8JmquUkkw';
 
-      map = L.mapbox.map('map')
-      .setView([32.7157, -117.1611], 13);
-
+      map = L.mapbox.map('map').setView([32.7157, -117.1611], 13);
       L.tileLayer('https://api.mapbox.com/styles/v1/tungalbert99/ciqxdskwv0007c4ktiubhssd4/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoidHVuZ2FsYmVydDk5IiwiYSI6ImNpcXhkbGplbTAxZnhmdm1nMjkycnE5ZjYifQ.nPjdhFFlu1agC8JmquUkkw').addTo(map);
+
+      camerasLayer = L.mapbox.featureLayer().addTo( map );
+      accidentsLayer = L.mapbox.featureLayer().addTo( map );
 
       console.log( "Map Initialized." );
     }
@@ -68,7 +71,6 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
         }
 
         // add to map
-        var myLayer = L.mapbox.featureLayer().setGeoJSON(geojson).addTo(map);
       } );
     }
 
@@ -103,7 +105,6 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
         }
 
         // add to map
-        var myLayer = L.mapbox.featureLayer().setGeoJSON(geojson).addTo(map);
       } );
 
     }
