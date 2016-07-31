@@ -149,6 +149,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
               publicSafetyData.imageToDisplay = data;
             }, function() {
               if(!publicSafetyData.imageToDisplay) {
+                console.log( "no image to display" );
                 publicSafetyData.imageToDisplay = 'images/parking_location.png';
               }
             });
