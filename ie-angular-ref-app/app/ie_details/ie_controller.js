@@ -159,8 +159,11 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 			$scope.startTime = startTime;
 
 			$scope.getTrafficData(startTime, endTime, startingAsset);
-			$scope.getPedestrianData(startTime, endTime, '1000000027');
 
+      for(var i = 0; i < $scope.assetNumbers.length; i++){
+        $scope.getPedestrianData(startTime, endTime, $scope.assetNumbers[i]);
+      }
+			
 			// change the size for parking and public safety calls.
 			size = 200;
 			$scope.getPublicSafetyData(startTime, endTime, startingAsset);
@@ -223,6 +226,8 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 	*/
 	$scope.getPedestrianData = function(startTime, endTime, assetNumber) {
 
+    var countPedestrians = 0;
+
 		CurrentServices.getPedestrianData($scope.uaaToken, startTime, endTime, assetNumber).then(function(data){
 			if(data && data._embedded && data._embedded.events && data._embedded.events.length > 0) {
 				for(var i = 0; i < data._embedded.events.length; i++) {
@@ -235,10 +240,11 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 
 						if(measure.tag && measure.tag === 'SFCNT') {
 							objectData.count = measure.value;
+              countPedestrians += objectData.count;
 						}
 					}
 
-					$scope.pedestrianData.push(objectData);
+					// $scope.pedestrianData.push(objectData);
 				}
 
 				if(data._links["next-page"]) {
@@ -248,9 +254,14 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 						var newEndTime = url.substring(url.indexOf("end-ts=") + 7, url.indexOf("&size"));
 						$scope.getPedestrianData(newStartTime, newEndTime, assetNumber);
 					}
+          else{
+             $scope.pedestrianData.push({assetNumber: countPedestrians});
+          }
 				}
 			}
 		});
+
+    
 
 	};
 
