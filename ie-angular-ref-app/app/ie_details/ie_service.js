@@ -155,7 +155,7 @@ app.service('CurrentServices', ['$http', '$q', function($http, $q) {
   * Users will have to create predix zone id for API calls as per the documentation.
   */
   function getImage (uaaToken, imageUrl) {
-      var token = 'Bearer '+uaaToken;
+      var token = 'Bearer ' + uaaToken;
 
       // Your image api predix zone id.
       var imagePredixZoneId = 'c75697cb-873c-4ebb-abeb-9c6c9ecd3fc7';
@@ -341,7 +341,7 @@ app.service('CurrentServices', ['$http', '$q', function($http, $q) {
   * Users will have to create predix zone id for API calls as per the documentation.
   */
   function getHistoricalDwellTime (uaaToken, startTime, endTime) {
-      var token = 'Bearer '+ uaaToken;
+      var token = 'Bearer ' + uaaToken;
 
       // Historical dwell time analytics URL. This will be obtained from HATEOAS model.
       var positioningUrl = 'https://ie-positioning.run.aws-usw02-pr.ice.predix.io/v1/locations/1000000106/analytics';
@@ -352,12 +352,12 @@ app.service('CurrentServices', ['$http', '$q', function($http, $q) {
 
       // Ajax call to historical positioning api.
       $http({
-            method: 'GET',
-            url: positioningUrl,
-            headers: {'Authorization': token, 'Predix-Zone-Id': positioningPredixZoneId},
-            params: {'analytic-names':'DWLZONE', 'analytic-categories':'DWELL_TIME', 'start-ts':startTime, 'end-ts':endTime},
-            timeout: 30000,
-            cache: false
+          method: 'GET',
+          url: positioningUrl,
+          headers: {'Authorization': token, 'Predix-Zone-Id': positioningPredixZoneId},
+          params: {'analytic-names':'DWLZONE', 'analytic-categories':'DWELL_TIME', 'start-ts':startTime, 'end-ts':endTime},
+          timeout: 30000,
+          cache: false
         })
         .success(function(data){
           deferred.resolve(data);
@@ -366,6 +366,53 @@ app.service('CurrentServices', ['$http', '$q', function($http, $q) {
           deferred.reject(err);
         });
       return deferred.promise;
+  }
+
+  function getPitneyBowesToken() {
+    var token = 'Basic ' + 'ZVdsZllKVVVtWnVpYTd2QWNZOGUxSllrd0FjV2xmZjQ6V3RyQTN5VHVmQUs5Z2x0bA==';
+
+    var url = 'https://api.pitneybowes.com/oauth/token';
+
+    var deferred = $q.defer();
+
+    $http({
+      method: 'POST',
+      url: url,
+      headers: {'Authorization': token, 'Content-Type': 'application/x-www-form-urlencoded'},
+      data: {'grant_type' : 'client_credentials'},
+      timeout: 30000,
+      cache: false
+    })
+    .success(function(data){
+      deferred.resolve(data);
+    })
+    .error(function(err){
+      deferred.reject(err);
+    });
+
+  }
+    //https://api.pitneybowes.com/location-intelligence/geoenhance/v1/address/bylocation?latitude=34.59667&longitude=-86.96556
+
+  function getPitneyAddress(pitneyToken, latitude, longitude){
+    var url = 'https://api.pitneybowes.com/location-intelligence/geoenhance/v1/address/bylocation?latitude=' + latitude + "&longitude=" + longitude;
+
+    var token = 'Bearer ' + pitneyToken;
+    var deferred = $q.defer();
+
+    $http({
+      method: 'POST',
+      url: url,
+      headers: {'Authorization': token},
+      timeout: 30000,
+      cache: false
+    })
+    .success(function(data){
+      deferred.resolve(data);
+    })
+    .error(function(err){
+      deferred.reject(err);
+    });
+
   }
 
   return {
@@ -380,6 +427,8 @@ app.service('CurrentServices', ['$http', '$q', function($http, $q) {
     getEnvLight: getEnvLight,
     getHistoricalPath: getHistoricalPath,
     getHistoricalPosition: getHistoricalPosition,
-    getHistoricalDwellTime: getHistoricalDwellTime
+    getHistoricalDwellTime: getHistoricalDwellTime,
+    getPitneyBowesToken: getPitneyBowesToken,
+    getPitneyAddress: getPitneyAddress
   };
 }]);
