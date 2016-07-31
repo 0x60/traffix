@@ -28,14 +28,14 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
       }).then(function(){
         // populate the start time, end time and size to give calls to apis.
         var endTime = moment.now();
-        var startTime = moment(endTime).subtract(1, 'hour').valueOf();
+        var startTime = moment(endTime).subtract(1, 'week').valueOf();
 
         $scope.getTrafficData(startTime, endTime, startingAsset);
         $scope.getPedestrianData(startTime, endTime, '1000000027');
 
         // change the size for parking and public safety calls.
         size = 200;
-        $scope.getPublicSafetyData(startTime, endTime, size);
+        $scope.getPublicSafetyData(startTime, endTime, startingAsset);
 
       });
     };
@@ -130,9 +130,9 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
     * Below method will make a call to public safety event Service and
     * populates the response data in scope object.
     */
-    $scope.getPublicSafetyData = function(startTime, endTime, size) {
+    $scope.getPublicSafetyData = function(startTime, endTime, assetNumber) {
       var publicSafetyData = {};
-      CurrentServices.getPublicSafetyData($scope.uaaToken, startTime, endTime, size).then(function(data){
+      CurrentServices.getPublicSafetyData($scope.uaaToken, startTime, endTime, assetNumber).then(function(data){
         console.log(data);
         if(data && data._embedded && data._embedded.medias) {
             var eventsLen =  data._embedded.medias.length;

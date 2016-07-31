@@ -90,10 +90,10 @@ app.service('CurrentServices', ['$http', '$q', function($http, $q) {
   * Below method will make a call to public safety api.
   * Users will have to create predix zone id for API calls as per the documentation.
   */
-  function getPublicSafetyData (uaaToken, startTime, endTime, size) {
+  function getPublicSafetyData (uaaToken, startTime, endTime, assetNumber) {
       var token = 'Bearer '+ uaaToken;
       // Public Events URL. This will be obtained from HATEOAS model.
-      var publicSafetyEventsUrl = 'https://ie-public-safety.run.aws-usw02-pr.ice.predix.io/v1/assets/1000000024/media';
+      var publicSafetyEventsUrl = 'https://ie-public-safety.run.aws-usw02-pr.ice.predix.io/v1/assets/' + assetNumber + '/media';
 
       // Your public safety api predix zone id.
       var publicSafetyPredixZoneId = 'c75697cb-873c-4ebb-abeb-9c6c9ecd3fc7';
@@ -104,7 +104,7 @@ app.service('CurrentServices', ['$http', '$q', function($http, $q) {
       $http({
             method: 'GET',
             url: publicSafetyEventsUrl,
-            params: {'media-types':'IMAGE,VIDEO', 'start-ts':startTime, 'end-ts':endTime, 'size':size},
+            params: {'media-types':'IMAGE,VIDEO', 'start-ts':startTime, 'end-ts':endTime},
             headers: {'Authorization': token, 'Predix-Zone-Id': publicSafetyPredixZoneId},
             timeout: 30000,
             cache: false
