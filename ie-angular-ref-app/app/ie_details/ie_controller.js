@@ -475,6 +475,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 
 			// stop checking
 			clearInterval( cameralocations.timer );
+
 		} else {
 			console.log( "cameras left: " + cameralocations.counter );
 			console.log( "cameras images left: " + cameralocations.imageCounter );
@@ -587,4 +588,23 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 				plotCameras();
 		});
 	}
+
+  $scope.toggleCameraState = function(cameraStatus){
+    if(!cameraStatus){
+      map.removeLayer(camerasLayer);
+    }
+    else{
+      map.addLayer(camerasLayer);
+    }
+  }
+
+  $scope.toggleAccidentState = function(accidentStatus){
+    if(!accidentStatus){
+      map.removeLayer(accidentsLayer);
+    }
+    else{
+      map.addLayer(accidentsLayer);
+    }
+  }
+
 }]);
