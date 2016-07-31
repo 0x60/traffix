@@ -33,10 +33,11 @@
 	$request_headers = array(
 		"Authorization: " . $auth,
 		"Predix-Zone-Id: " . $pzi,
-		"Origin: " . $_SERVER[ "HTTP_ORIGIN" ],
-		"Referer: " . $_SERVER[ "HTTP_REFERER" ],
 		"Accept: */*",
 		"DNT: 1" );
+
+	if( isset( $_SERVER[ "HTTP_ORIGIN" ] ) ) $request_headers[] = "Origin: " . $_SERVER[ "HTTP_ORIGIN" ];
+	if( isset( $_SERVER[ "HTTP_REFERER" ] ) ) $request_headers[] = "Referer: " . $_SERVER[ "HTTP_REFERER" ];
 
 	$ch = curl_init(); 
 	curl_setopt( $ch, CURLOPT_URL, $request_url ); 
