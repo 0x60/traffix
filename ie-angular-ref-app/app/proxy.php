@@ -20,8 +20,8 @@
 	*/
 
 	$request_url = $_GET[ "url" ];
-	$auth = $_SERVER[ "HTTP_Authorization" ];
-	$pzi = $_SERVER[ "HTTP_Predix_Zone_Id" ];
+	$auth = $_SERVER[ "HTTP_AUTHORIZATIONX" ];
+	$pzi = $_SERVER[ "HTTP_PREDIX_ZONE_ID" ];
 
 	// get file data
 	preg_match( '/.+\/(.+)/', $request_url, $matches );

@@ -167,7 +167,7 @@ app.service('CurrentServices', ['$http', '$q', function($http, $q) {
       $http({
             method: 'GET',
             url: newImageUrl,
-            headers: {'Authorization': token, 'Predix-Zone-Id': imagePredixZoneId},
+            headers: {'Authorizationx': token, 'Predix-Zone-Id': imagePredixZoneId},
             timeout: 30000,
             cache: false
         })
