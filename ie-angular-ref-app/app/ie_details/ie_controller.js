@@ -19,7 +19,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
     // Whenever this controller is loaded, it will give a call to below method.
     fetchUAA();
 
-    fetchPitney();
+    fetchPitney(arrayOfCoord);
 
     /**
     * Below method will make a call to UAA Oauth Service and fetch the uaa token.
