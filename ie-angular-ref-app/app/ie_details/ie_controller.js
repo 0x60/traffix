@@ -19,7 +19,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
     // Whenever this controller is loaded, it will give a call to below method.
     fetchUAA();
 
-    fetchPitney(arrayOfCoord);
+    fetchPitney($scope.arrayOfCoord);
 
     /**
     * Below method will make a call to UAA Oauth Service and fetch the uaa token.
@@ -137,7 +137,6 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
     $scope.getPublicSafetyData = function(startTime, endTime, assetNumber) {
       var publicSafetyData = {};
       CurrentServices.getPublicSafetyData($scope.uaaToken, startTime, endTime, assetNumber).then(function(data){
-        console.log(data);
         if(data && data._embedded && data._embedded.medias) {
             var eventsLen =  data._embedded.medias.length;
             for (var eventsIdx = 0; eventsIdx < eventsLen; eventsIdx++) {
@@ -340,11 +339,10 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
     function fetchPitney(arrayCoord) {
       CurrentServices.getPitneyBowesToken().then(function(data){
         $scope.pitneyToken = data['access_token'];
-        console.log($scope.pitneyToken);
       }).then(function(){
         for(var i = 0; i < arrayCoord.length; i++){
           var location = arrayCoord[i];
-          arrayOfAddress.push($scope.getAddress(location.latitude, location.longitude));
+          $scope.arrayOfAddress.push($scope.getAddress(location.latitude, location.longitude));
         }
       });
     };
@@ -352,7 +350,6 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
     $scope.getAddress = function(latitude, longitude){
       CurrentServices.getPitneyAddress($scope.pitneyToken, latitude, longitude).then(function(data){
         var address = data.location[0].address;
-        console.log(address);
         return {'mainAddress': address.mainAddressLine, 'cityStateZip': address.addressLastLine};
       });
     };
