@@ -42,6 +42,13 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 	var accidentsLayer;
 	var pedestriansLayer;
 
+  var carlocations = {
+    counts: {},
+    avgSpeed: {},
+    processed: 0,
+    timer: undefined
+  }
+
 	var pedestrianlocations = {
 		counts: {},
 		processed: 0,
@@ -177,7 +184,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 		}).then(function(){
 			// populate the start time, end time and size to give calls to apis.
 			var endTime = moment.now();
-			var startTime = moment(endTime).subtract(12, 'hour').valueOf();
+			var startTime = moment(endTime).subtract(1, 'hour').valueOf();
 			$scope.endTime = endTime;
 			$scope.startTime = startTime;
 
@@ -188,6 +195,8 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 			for(var i = 0; i < assetNumbers.length; i++){
 				pedestrianlocations.counts[ assetNumbers[ i ] ] = 0;
 				pedestrianlocations.processed++;
+        carlocations.counts[ assetNumbers[ i ] ] = 0;
+        carlocations.processed++;
 				$scope.getPedestrianData( startTime, endTime, assetNumbers[ i ] );
 			}
 			pedestrianlocations.timer = setInterval( checkPedestriansProcessed, timerLimit );
@@ -231,7 +240,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 				}
 			}
 
-			if(data._links["next-page"]) {
+			if(data._links && data._links[ "next-page" ] ) {
 				var url = data._links["next-page"]["href"];
 				var newStartTime = url.substring(url.indexOf("start-ts=") + 9, url.indexOf("&end-ts"));
 				if(newStartTime !== 0){
@@ -253,7 +262,8 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 	* populates the response data in scope object.
 	*/
 	$scope.getPedestrianData = function( startTime, endTime, assetNumber ) {
-	    var countPedestrians = 0;
+	 var countPedestrians = pedestrianlocations.counts[ assetNumber ];
+   console.log('count ' + countPedestrians);
 		CurrentServices.getPedestrianData( $scope.uaaToken, startTime, endTime, assetNumber ).then( function( data ) {
 			if( data && data._embedded && data._embedded.events && data._embedded.events.length > 0 ) {
 				for( var i = 0; i < data._embedded.events.length; i++ ) {
@@ -270,20 +280,21 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 					}
 				}
 
-				if( data._links[ "next-page" ] ) {
+				if( data._links && data._links[ "next-page" ] ) {
 					var url = data._links[ "next-page" ][ "href" ];
 					var newStartTime = url.substring( url.indexOf( "start-ts=" ) + 9, url.indexOf( "&end-ts" ) );
 					if( newStartTime != 0 ) {
 						var newEndTime = url.substring( url.indexOf( "end-ts=" ) + 7, url.indexOf( "&size" ) );
+            pedestrianlocations.counts[ assetNumber ] = countPedestrians;
 						$scope.getPedestrianData( newStartTime, newEndTime, assetNumber );
-						pedestrianlocations.processed++;
 					}
+          else{
+            pedestrianlocations.counts[ assetNumber ] = countPedestrians;
+            pedestrianlocations.processed--;
+          }
 				}
 			}
-
-			// update count
-			pedestrianlocations.counts[ assetNumber ] = countPedestrians;
-			pedestrianlocations.processed--;
+      pedestrianlocations.processed--;
 		}, function( err ) {
 			// something went wrong
 			pedestrianlocations.processed--;
