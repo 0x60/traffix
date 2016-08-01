@@ -184,7 +184,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 		}).then(function(){
 			// populate the start time, end time and size to give calls to apis.
 			var endTime = moment.now();
-			var startTime = moment(endTime).subtract(1, 'hour').valueOf();
+			var startTime = moment(endTime).subtract(2, 'hour').valueOf();
 			$scope.endTime = endTime;
 			$scope.startTime = startTime;
 
@@ -195,8 +195,8 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 			for(var i = 0; i < assetNumbers.length; i++){
 				pedestrianlocations.counts[ assetNumbers[ i ] ] = 0;
 				pedestrianlocations.processed++;
-        carlocations.counts[ assetNumbers[ i ] ] = 0;
-        carlocations.processed++;
+		        carlocations.counts[ assetNumbers[ i ] ] = 0;
+		        carlocations.processed++;
 				$scope.getPedestrianData( startTime, endTime, assetNumbers[ i ] );
 			}
 			pedestrianlocations.timer = setInterval( checkPedestriansProcessed, timerLimit );
@@ -263,7 +263,6 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 	*/
 	$scope.getPedestrianData = function( startTime, endTime, assetNumber ) {
 	 var countPedestrians = pedestrianlocations.counts[ assetNumber ];
-   console.log('count ' + countPedestrians);
 		CurrentServices.getPedestrianData( $scope.uaaToken, startTime, endTime, assetNumber ).then( function( data ) {
 			if( data && data._embedded && data._embedded.events && data._embedded.events.length > 0 ) {
 				for( var i = 0; i < data._embedded.events.length; i++ ) {
