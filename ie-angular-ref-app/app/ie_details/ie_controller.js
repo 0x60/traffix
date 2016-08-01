@@ -237,6 +237,10 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 	* populates the response data in scope object.
 	*/
 	$scope.getTrafficData = function(startTime, endTime, assetNumber) {
+		// make sure we dont get NaNs
+		if( isNaN( carlocations.counts[ assetNumber ] ) ) carlocations.counts[ assetNumber ] = 0;
+		if( isNaN( carlocations.speeds[ assetNumber ] ) ) carlocations.speeds[ assetNumber ] = 0;
+
 		CurrentServices.getTrafficData($scope.uaaToken, startTime, endTime, assetNumber).then(function(data) {
 		    if (data && data._embedded && data._embedded.events && data._embedded.events.length > 0) {
 		        for (var i = 0; i < data._embedded.events.length; i++) {
@@ -257,7 +261,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 		                }
 
 		                carlocations.counts[ assetNumber ] += objectData.count;
-		                carlocations.speeds[ assetNumber ] += ( parseInt( objectData.speed * objectData.count ) || 0 );
+		                carlocations.speeds[ assetNumber ] += objectData.speed * objectData.count;
 		            }
 		        }
 
@@ -271,8 +275,6 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 		            }
 		        }
 		    }
-
-		    console.log( "asset %s: %d %d", assetNumber, carlocations.counts[ assetNumber ], carlocations.speeds[ assetNumber ] );
 
 		    carlocations.processed--;
 		}, function(err) {
