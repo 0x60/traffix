@@ -1,52 +1,5 @@
 <div id="map"></div>
 
-<div class="container-fluid" style="padding-left: 0px;">
-  <div class="row equal">
-    <!--begin panel 1 -->
-    <div class="col-md-6">
-      <div style="text-align:center" class="panel panel-primary">
-        <div class="panel-heading">
-          <h1 class="panel-title text-center">Traffic Planning</h1>
-        </div>
-        <!-- end panel-heading -->
-        <div class="panel-body">
-          <p class="text-left lead2">Below information is received from Intelligent Environment's Traffic API Service call.</p>
-          <ul class="text-left">
-            <div ng-repeat="objectData in trafficData | limitTo: 15">
-              {{objectData}}
-            </div>
-            <!-- <li><span class="labelClass">Speed:</span> {{trafficData.speed}}</li>
-            <li><span class="labelClass">Direction:</span>  {{trafficData.direction}}</li>
-            <li><span class="labelClass">Count: </span> {{trafficData.count}}</li> -->
-          </ul>
-        </div>
-        <!-- end panel-body -->
-      </div>
-      <!-- end panel-primary -->
-    </div>
-    <!--end col-md-4 -->
-    <!-- begin panel 2 -->
-  
-    <!--begin panel 1 -->
-    <div class="col-md-6">
-      <div style="text-align:center" class="panel panel-primary">
-        <div class="panel-heading">
-          <h1 class="panel-title text-center">Pedestrian Planning</h1>
-        </div>
-        <!-- end panel-heading -->
-        <div class="panel-body">
-          <p class="text-left lead2">Below information is received from Intelligent Environment's Pedestrian API Service call.</p>
-          <div ng-repeat="objectData in pedestrianData | limitTo: 15">
-              {{objectData}}
-          </div>
-        </div>
-        <!-- end panel-body -->
-      </div>
-      <!-- end panel-primary -->
-    </div>
-
-  </div>
-  <!-- end row -->
 
   <input type="checkbox" ng-model="cameraStatus" ng-change="toggleCameraState(cameraStatus)">Cameras</input>
   <input type="checkbox" ng-model="accidentStatus" ng-change="toggleAccidentState(
