@@ -44,7 +44,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 
   var carlocations = {
     counts: {},
-    avgSpeed: {},
+    speeds: {},
     processed: 0,
     timer: undefined
   }
@@ -195,9 +195,10 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 			for(var i = 0; i < assetNumbers.length; i++){
 				pedestrianlocations.counts[ assetNumbers[ i ] ] = 0;
 				pedestrianlocations.processed++;
-		        carlocations.counts[ assetNumbers[ i ] ] = 0;
-		        carlocations.processed++;
+        carlocations.counts[ assetNumbers[ i ] ] = 0;
+        carlocations.processed++;
 				$scope.getPedestrianData( startTime, endTime, assetNumbers[ i ] );
+        $scope.getTrafficData( startTime, endTime, assetNumbers[ i ] );
 			}
 			pedestrianlocations.timer = setInterval( checkPedestriansProcessed, timerLimit );
 			
@@ -214,6 +215,9 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 	*/
 	$scope.getTrafficData = function(startTime, endTime, assetNumber) {
 
+    var countCars = carlocations.counts[ assetNumber ];
+    var countSpeeds = carlocations.speeds[ assetNumber ];
+
 		CurrentServices.getTrafficData($scope.uaaToken, startTime, endTime, assetNumber).then(function(data){
 			if(data && data._embedded && data._embedded.events && data._embedded.events.length > 0) {
 				for(var i = 0; i < data._embedded.events.length; i++) {
@@ -228,32 +232,42 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 								objectData.speed = measure.value + ' MPH';
 							} else if (measure.tag === 'vehicleCount') {
 								objectData.count = measure.value;
+                countCars += objectData;
 							}
 						}
 					}
+
+          countSpeeds += countCars * parseInt(objectData.speed.match(/[0-9]+/)[0]);
+
 					objectData.location_uid = event[ "location-uid" ];
 					objectData.vehicle = event["properties.vehicle-type"];
 
 					objectData.date = new Date(event["timestamp"]);
 
-					$scope.trafficData.push(objectData);
+					// $scope.trafficData.push(objectData);
 				}
+        if(data._links && data._links[ "next-page" ] ) {
+          var url = data._links["next-page"]["href"];
+          var newStartTime = url.substring(url.indexOf("start-ts=") + 9, url.indexOf("&end-ts"));
+          if(newStartTime !== 0){
+            var newEndTime = url.substring(url.indexOf("end-ts=") + 7, url.indexOf("&size"));
+            carlocations.counts[ assetNumber ] = countCars;
+            carlocations.speeds[ assetNumber ] = countSpeeds;
+            $scope.getTrafficData(newStartTime, newEndTime, assetNumber);
+          }
+          else{
+            carlocations.counts[ assetNumber ] = countCars;
+            carlocations.speeds[ assetNumber ] = countSpeeds;
+            carlocations.processed--;
+          }
+        }
 			}
 
-			if(data._links && data._links[ "next-page" ] ) {
-				var url = data._links["next-page"]["href"];
-				var newStartTime = url.substring(url.indexOf("start-ts=") + 9, url.indexOf("&end-ts"));
-				if(newStartTime !== 0){
-					var newEndTime = url.substring(url.indexOf("end-ts=") + 7, url.indexOf("&size"));
-					$scope.getTrafficData(newStartTime, newEndTime, assetNumber);
-				}
-			}
-			else{
-				return;
-			}
-				
+      carlocations.processed--;
 
-		});
+      }, function(err){
+        carlocations.processed--;
+      });
 
 	};
 
@@ -262,7 +276,9 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 	* populates the response data in scope object.
 	*/
 	$scope.getPedestrianData = function( startTime, endTime, assetNumber ) {
+
 	 var countPedestrians = pedestrianlocations.counts[ assetNumber ];
+
 		CurrentServices.getPedestrianData( $scope.uaaToken, startTime, endTime, assetNumber ).then( function( data ) {
 			if( data && data._embedded && data._embedded.events && data._embedded.events.length > 0 ) {
 				for( var i = 0; i < data._embedded.events.length; i++ ) {
@@ -676,7 +692,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 							tlng += ( ( Math.random() - 0.5 ) * 0.001 );
 						}
 
-						temparray.push( [ tlat, tlng, Math.random() * 0.1 ] );
+						temparray.push( [ tlat, tlng, Math.random() * 0.2 ] );
 					}
 				}
 			}
