@@ -49,9 +49,9 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 		processed: 0,
 		timer: undefined,
 		mapoptions: {
-			maxZoom: 20,
+			maxZoom: 15,
 			radius: 10,
-			blur: 15,
+			blur: 30,
 			gradient: {
 		        0.2: 'blue',
 		        0.6: 'cyan',
@@ -65,9 +65,9 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 		processed: 0,
 		timer: undefined,
 		mapoptions: {
-			maxZoom: 20,
+			maxZoom: 15,
 			radius: 10,
-			blur: 20,
+			blur: 30,
 			gradient: {
 		        0.2: 'yellow',
 		        0.6: 'orange',
@@ -748,12 +748,12 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 						var tlng = lng;
 
 						if( Math.random() > 0.5 ) {
-							tlat += ( ( Math.random() - 0.5 ) * 0.00005 * avgspeed );
+							tlat += ( ( Math.random() - 0.5 ) * 0.0001 * avgspeed );
 						} else {
-							tlng += ( ( Math.random() - 0.5 ) * 0.00005 * avgspeed );
+							tlng += ( ( Math.random() - 0.5 ) * 0.0001 * avgspeed );
 						}
 
-						temparray.push( [ tlat, tlng, count / maxcount ] );
+						temparray.push( [ tlat, tlng, count / maxcount * 0.2 ] );
 					}
 				} else {
 					console.warn( "average speed is NaN or count is 0" );
