@@ -105,12 +105,93 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 		accidentsLayer = L.mapbox.featureLayer().addTo( map );
 
 		// disable zoom
-		map.touchZoom.disable();
-		map.doubleClickZoom.disable();
-		map.scrollWheelZoom.disable();
-		map.keyboard.disable();
+		// map.touchZoom.disable();
+		// map.doubleClickZoom.disable();
+		// map.scrollWheelZoom.disable();
+		// map.keyboard.disable();
+
+		initChart();
 
 		console.log( "Map Initialized." );
+	}
+
+	function initChart(){
+		$.get( "assets/accidents_SanDiego.txt", function( data ) {
+			// get json
+			var accidentsTime = {};
+			var data = JSON.parse( data );
+
+			// iterate through items
+			for( var i = 0; i < data.length; i++ ) {
+				var d = new Date(data[i]['time']);
+
+				if(d === 'Invalid Date')
+					continue;
+
+				var year = d.getFullYear();
+
+				if(isNaN(year))
+					continue;
+
+				if(!accidentsTime[year.toString()]){
+					accidentsTime[year.toString()] = 1;
+				}
+				else{
+					accidentsTime[year.toString()] += 1;
+				}
+			}
+
+			var years = Object.keys(accidentsTime);
+			var myData = [];
+
+			for(var i = 0; i < years.length; i++){
+				myData.push(accidentsTime[years[i]]);
+			}
+
+			var ctx = document.getElementById("myChart");
+			var myChart = new Chart(ctx, {
+			    type: 'line',
+			    data: {
+			      labels: years,
+	    			datasets: [
+			        	{
+			            label: "Number of Fatal Accidents over Time",
+			            fill: false,
+			            lineTension: 0,
+			            backgroundColor: "rgba(75,192,192,0.4)",
+			            borderColor: "rgba(75,192,192,1)",
+			            borderCapStyle: 'butt',
+			            borderDash: [],
+			            borderDashOffset: 0.0,
+			            borderJoinStyle: 'miter',
+			            pointBorderColor: "rgba(75,192,192,1)",
+			            pointBackgroundColor: "#fff",
+			            pointBorderWidth: 1,
+			            pointHoverRadius: 5,
+			            pointHoverBackgroundColor: "rgba(75,192,192,1)",
+			            pointHoverBorderColor: "rgba(220,220,220,1)",
+			            pointHoverBorderWidth: 2,
+			            pointRadius: 1,
+			            pointHitRadius: 10,
+			            data: myData,
+			            spanGaps: false,
+			        	}]
+			    },
+			    options: {
+			        scales: {
+			            yAxes: [{
+			                ticks: {
+			                    beginAtZero:true
+			                }
+			            }]
+			        },
+			        responsive: true,
+			        maintainAspectRatio: false
+			    }
+			});
+
+			
+		} );
 	}
 
 	function plotCameras() {
@@ -661,6 +742,17 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 			map.removeLayer( accidentsLayer );
 		} else {
 			map.addLayer( accidentsLayer );
+		}
+	}
+
+	$scope.showGraph = false;
+
+	$scope.toggleGraph = function(show){
+		if(!show){
+			showGraph = true;
+		}
+		else{
+			showGraph = false;
 		}
 	}
 
