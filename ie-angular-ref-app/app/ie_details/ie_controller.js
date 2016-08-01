@@ -184,7 +184,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 		}).then(function(){
 			// populate the start time, end time and size to give calls to apis.
 			var endTime = moment.now();
-			var startTime = moment(endTime).subtract(2, 'hour').valueOf();
+			var startTime = moment(endTime).subtract(3, 'hour').valueOf();
 			$scope.endTime = endTime;
 			$scope.startTime = startTime;
 
@@ -654,14 +654,10 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 			// add to map
 			var temparray = [];
 
-			var maxcount = 0;
 			for( var i = 0; i < assetNumbers.length; i++ ) {
 				var assetnum = assetNumbers[ i ];
 				var count = pedestrianlocations.counts[ assetnum ];
-				if( count > maxcount ) maxcount = count;
-			}
 
-			for( var i = 0; i < assetNumbers.length; i++ ) {
 				var assetnum = assetNumbers[ i ];
 				var count = pedestrianlocations.counts[ assetnum ];
 
@@ -670,13 +666,22 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 					var lat = assetMapping[ assetnum ][ 0 ];
 					var lng = assetMapping[ assetnum ][ 1 ];
 
-					temparray.push( [ lat, lng, count / maxcount ] );
+					for( var j = count; j > 0; j-- ) {
+						var tlat = lat;
+						var tlng = lng;
+
+						if( Math.random() > 0.5 ) {
+							tlat += ( ( Math.random() - 0.5 ) * 0.001 );
+						} else {
+							tlng += ( ( Math.random() - 0.5 ) * 0.001 );
+						}
+
+						temparray.push( [ tlat, tlng, Math.random() * 0.1 ] );
+					}
 				}
 			}
 
-			console.log( temparray );
-
-			pedestriansLayer = L.heatLayer( temparray, { maxZoom: 20, radius: 10 } ).addTo( map );
+			pedestriansLayer = L.heatLayer( temparray, { maxZoom: 20, radius: 30 } ).addTo( map );
 
 			// stop checking
 			clearInterval( pedestrianlocations.timer );
