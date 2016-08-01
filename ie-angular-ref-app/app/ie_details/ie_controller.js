@@ -12,7 +12,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 	var assetNumbers = [];
 	$scope.trafficData = [];
 	$scope.pedestrianData = [];
-	var timerLimit = 1000;
+	var timerLimit = 1500; // 1.5s
 
 	// TODO: make this dynamic
 	var assetMapping = {
@@ -41,18 +41,39 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 	var camerasLayer;
 	var accidentsLayer;
 	var pedestriansLayer;
+	var carsLayer;
 
-  var carlocations = {
-    counts: {},
-    speeds: {},
-    processed: 0,
-    timer: undefined
-  }
+	var carlocations = {
+		counts: {},
+		speeds: {},
+		processed: 0,
+		timer: undefined,
+		mapoptions: {
+			maxZoom: 20,
+			radius: 10,
+			blur: 15,
+			gradient: {
+		        0.2: 'blue',
+		        0.6: 'cyan',
+		        1.0: 'lime'
+		    }
+		}
+	}
 
 	var pedestrianlocations = {
 		counts: {},
 		processed: 0,
-		timer: undefined
+		timer: undefined,
+		mapoptions: {
+			maxZoom: 20,
+			radius: 10,
+			blur: 20,
+			gradient: {
+		        0.2: 'yellow',
+		        0.6: 'orange',
+		        1.0: 'red'
+		    }
+		}
 	}
 
 	var cameralocations = {
@@ -188,19 +209,21 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 			$scope.endTime = endTime;
 			$scope.startTime = startTime;
 
-			// get traffic data
-			$scope.getTrafficData(startTime, endTime, startingAsset);
-
-			// get pedestrian data
+			// get pedestrian data for each asset
 			for(var i = 0; i < assetNumbers.length; i++){
 				pedestrianlocations.counts[ assetNumbers[ i ] ] = 0;
+				carlocations.counts[ assetNumbers[ i ] ] = 0;
+
 				pedestrianlocations.processed++;
-        carlocations.counts[ assetNumbers[ i ] ] = 0;
-        carlocations.processed++;
+				carlocations.processed++;
+
 				$scope.getPedestrianData( startTime, endTime, assetNumbers[ i ] );
-        $scope.getTrafficData( startTime, endTime, assetNumbers[ i ] );
+		        $scope.getTrafficData( startTime, endTime, assetNumbers[ i ] );
 			}
+
+			// check when to render the heatmaps
 			pedestrianlocations.timer = setInterval( checkPedestriansProcessed, timerLimit );
+			carlocations.timer = setInterval( checkCarsProcessed, timerLimit );
 			
 			// change the size for parking and public safety calls.
 			size = 200;
@@ -214,61 +237,47 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 	* populates the response data in scope object.
 	*/
 	$scope.getTrafficData = function(startTime, endTime, assetNumber) {
+		CurrentServices.getTrafficData($scope.uaaToken, startTime, endTime, assetNumber).then(function(data) {
+		    if (data && data._embedded && data._embedded.events && data._embedded.events.length > 0) {
+		        for (var i = 0; i < data._embedded.events.length; i++) {
+		            var event = data._embedded.events[i];
+		            if (event && event.measures) {
+		            	var objectData = {
+		            		count: 0,
+		            		speed: 0
+		            	};
 
-    var countCars = carlocations.counts[ assetNumber ];
-    var countSpeeds = carlocations.speeds[ assetNumber ];
+		                for (var idx = 0; idx < event.measures.length; idx++) {
+		                    var measure = event.measures[idx];
+		                    if (measure.tag === 'speed') {
+		                        objectData.speed = parseInt( measure.value ); // in MPH
+		                    } else if (measure.tag === 'vehicleCount') {
+		                        objectData.count = parseInt( measure.value );
+		                    }
+		                }
 
-		CurrentServices.getTrafficData($scope.uaaToken, startTime, endTime, assetNumber).then(function(data){
-			if(data && data._embedded && data._embedded.events && data._embedded.events.length > 0) {
-				for(var i = 0; i < data._embedded.events.length; i++) {
-					var event = data._embedded.events[i];
-					var objectData = {};
-					if(event && event.measures) {
-						for(var idx = 0; idx < event.measures.length; idx++) {
-							var measure = event.measures[idx];
-							if(measure.tag === 'direction') {
-								objectData.direction = $scope._getDirectionByDegree(measure.value);
-							} else if (measure.tag === 'speed') {
-								objectData.speed = measure.value + ' MPH';
-							} else if (measure.tag === 'vehicleCount') {
-								objectData.count = measure.value;
-                countCars += objectData;
-							}
-						}
-					}
+		                carlocations.counts[ assetNumber ] += objectData.count;
+		                carlocations.speeds[ assetNumber ] += ( parseInt( objectData.speed * objectData.count ) || 0 );
+		            }
+		        }
 
-          countSpeeds += countCars * parseInt(objectData.speed.match(/[0-9]+/)[0]);
+		        if (data._links && data._links["next-page"]) {
+		            var url = data._links["next-page"]["href"];
+		            var newStartTime = url.substring(url.indexOf("start-ts=") + 9, url.indexOf("&end-ts"));
+		            if (newStartTime !== 0) {
+		                var newEndTime = url.substring(url.indexOf("end-ts=") + 7, url.indexOf("&size"));
+		                $scope.getTrafficData(newStartTime, newEndTime, assetNumber);
+		                carlocations.processed++;
+		            }
+		        }
+		    }
 
-					objectData.location_uid = event[ "location-uid" ];
-					objectData.vehicle = event["properties.vehicle-type"];
+		    console.log( "asset %s: %d %d", assetNumber, carlocations.counts[ assetNumber ], carlocations.speeds[ assetNumber ] );
 
-					objectData.date = new Date(event["timestamp"]);
-
-					// $scope.trafficData.push(objectData);
-				}
-        if(data._links && data._links[ "next-page" ] ) {
-          var url = data._links["next-page"]["href"];
-          var newStartTime = url.substring(url.indexOf("start-ts=") + 9, url.indexOf("&end-ts"));
-          if(newStartTime !== 0){
-            var newEndTime = url.substring(url.indexOf("end-ts=") + 7, url.indexOf("&size"));
-            carlocations.counts[ assetNumber ] = countCars;
-            carlocations.speeds[ assetNumber ] = countSpeeds;
-            $scope.getTrafficData(newStartTime, newEndTime, assetNumber);
-          }
-          else{
-            carlocations.counts[ assetNumber ] = countCars;
-            carlocations.speeds[ assetNumber ] = countSpeeds;
-            carlocations.processed--;
-          }
-        }
-			}
-
-      carlocations.processed--;
-
-      }, function(err){
-        carlocations.processed--;
-      });
-
+		    carlocations.processed--;
+		}, function(err) {
+		    carlocations.processed--;
+		});
 	};
 
 	/**
@@ -276,44 +285,36 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 	* populates the response data in scope object.
 	*/
 	$scope.getPedestrianData = function( startTime, endTime, assetNumber ) {
+		CurrentServices.getPedestrianData($scope.uaaToken, startTime, endTime, assetNumber).then(function(data) {
+		    if (data && data._embedded && data._embedded.events && data._embedded.events.length > 0) {
+		        for (var i = 0; i < data._embedded.events.length; i++) {
+		            var event = data._embedded.events[i];
+		            var objectData = {};
+		            objectData.time = moment(event.timestamp).format('MMM Do YYYY, h:mm:ss a');
+		            objectData['location'] = event['location-uid'];
+		            if (event && event.measures && event.measures.length > 0) {
+		                var measure = event.measures[0];
+		                if (measure.tag && measure.tag === 'SFCNT') {
+		                    pedestrianlocations.counts[ assetNumber ] += measure.value;
+		                }
+		            }
+		        }
 
-	 var countPedestrians = pedestrianlocations.counts[ assetNumber ];
-
-		CurrentServices.getPedestrianData( $scope.uaaToken, startTime, endTime, assetNumber ).then( function( data ) {
-			if( data && data._embedded && data._embedded.events && data._embedded.events.length > 0 ) {
-				for( var i = 0; i < data._embedded.events.length; i++ ) {
-					var event = data._embedded.events[i];
-					var objectData = {};
-					objectData.time = moment( event.timestamp ).format( 'MMM Do YYYY, h:mm:ss a' );
-					objectData[ 'location' ] = event[ 'location-uid' ];
-					if( event && event.measures && event.measures.length > 0 ) {
-						var measure = event.measures[ 0 ];
-						if( measure.tag && measure.tag === 'SFCNT' ) {
-							objectData.count = measure.value;
-							countPedestrians += objectData.count;
-						}
-					}
-				}
-
-				if( data._links && data._links[ "next-page" ] ) {
-					var url = data._links[ "next-page" ][ "href" ];
-					var newStartTime = url.substring( url.indexOf( "start-ts=" ) + 9, url.indexOf( "&end-ts" ) );
-					if( newStartTime != 0 ) {
-						var newEndTime = url.substring( url.indexOf( "end-ts=" ) + 7, url.indexOf( "&size" ) );
-            pedestrianlocations.counts[ assetNumber ] = countPedestrians;
-						$scope.getPedestrianData( newStartTime, newEndTime, assetNumber );
-					}
-          else{
-            pedestrianlocations.counts[ assetNumber ] = countPedestrians;
-            pedestrianlocations.processed--;
-          }
-				}
-			}
-      pedestrianlocations.processed--;
-		}, function( err ) {
-			// something went wrong
-			pedestrianlocations.processed--;
-		} );
+		        if (data._links && data._links["next-page"]) {
+		            var url = data._links["next-page"]["href"];
+		            var newStartTime = url.substring(url.indexOf("start-ts=") + 9, url.indexOf("&end-ts"));
+		            if (newStartTime != 0) {
+		                var newEndTime = url.substring(url.indexOf("end-ts=") + 7, url.indexOf("&size"));
+		                $scope.getPedestrianData(newStartTime, newEndTime, assetNumber);
+		                pedestrianlocations.processed++;
+		            } 
+		        }
+		    }
+		    pedestrianlocations.processed--;
+		}, function(err) {
+		    // something went wrong
+		    pedestrianlocations.processed--;
+		});
 	};
 
 	/**
@@ -325,24 +326,24 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 
 		CurrentServices.getPublicSafetyData($scope.uaaToken, startTime, endTime, assetNumber).then(function(data){
 			if(data && data._embedded && data._embedded.medias) {
-					var eventsLen =  data._embedded.medias.length;
-					for (var eventsIdx = 0; eventsIdx < eventsLen; eventsIdx++) {
-						var event = data._embedded.medias[eventsIdx];
-						if(event['media-type'] === 'IMAGE') {
-							publicSafetyData.imageUrl = event.url;
-							break;
-						}
+				var eventsLen =  data._embedded.medias.length;
+				for (var eventsIdx = 0; eventsIdx < eventsLen; eventsIdx++) {
+					var event = data._embedded.medias[eventsIdx];
+					if(event['media-type'] === 'IMAGE') {
+						publicSafetyData.imageUrl = event.url;
+						break;
 					}
-					publicSafetyData.imageUrl = publicSafetyData.imageUrl.replace(/^http:\/\//i, 'https://');
+				}
+				publicSafetyData.imageUrl = publicSafetyData.imageUrl.replace(/^http:\/\//i, 'https://');
 
-					CurrentServices.getImage($scope.uaaToken, publicSafetyData.imageUrl).then(function(data){
-						publicSafetyData.imageToDisplay = data;
-					}, function() {
-						if(!publicSafetyData.imageToDisplay) {
-							console.log( "no image to display" );
-							publicSafetyData.imageToDisplay = 'images/parking_location.png';
-						}
-					});
+				CurrentServices.getImage($scope.uaaToken, publicSafetyData.imageUrl).then(function(data){
+					publicSafetyData.imageToDisplay = data;
+				}, function() {
+					if(!publicSafetyData.imageToDisplay) {
+						console.log( "no image to display" );
+						publicSafetyData.imageToDisplay = 'images/parking_location.png';
+					}
+				});
 			}
 		});
 
@@ -667,13 +668,13 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 
 	function checkPedestriansProcessed() {
 		if( pedestrianlocations.processed <= 0 ) {
+			// stop checking
+			clearInterval( pedestrianlocations.timer );
+
 			// add to map
 			var temparray = [];
 
 			for( var i = 0; i < assetNumbers.length; i++ ) {
-				var assetnum = assetNumbers[ i ];
-				var count = pedestrianlocations.counts[ assetnum ];
-
 				var assetnum = assetNumbers[ i ];
 				var count = pedestrianlocations.counts[ assetnum ];
 
@@ -697,10 +698,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 				}
 			}
 
-			pedestriansLayer = L.heatLayer( temparray, { maxZoom: 20, radius: 30 } ).addTo( map );
-
-			// stop checking
-			clearInterval( pedestrianlocations.timer );
+			pedestriansLayer = L.heatLayer( temparray, pedestrianlocations.mapoptions ).addTo( map );
 		} else {
 			console.log( "pedestrian locations left: " + pedestrianlocations.processed );
 		}
@@ -711,6 +709,66 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 			map.removeLayer( pedestriansLayer );
 		} else {
 			map.addLayer( pedestriansLayer );
+		}
+	}
+
+	function checkCarsProcessed() {
+		if( carlocations.processed <= 0 ) {
+			// stop checking
+			clearInterval( carlocations.timer );
+
+			// add to map
+			var temparray = [];
+
+			var maxcount = 0;
+			for( var i = 0; i < assetNumbers.length; i++ ) {
+				var assetnum = assetNumbers[ i ];
+				var count = carlocations.counts[ assetnum ];
+				if( count > maxcount ) maxcount = count;
+			}
+
+			for( var i = 0; i < assetNumbers.length; i++ ) {
+				var assetnum = assetNumbers[ i ];
+				var count = carlocations.counts[ assetnum ];
+				var speed = carlocations.speeds[ assetnum ];
+				var avgspeed = speed / count;
+
+				console.log( "asset %s: %d - %d", assetnum, count, speed );
+
+				// only work on counts > 0
+				// make sure is number lmao
+				if( count > 0 && ! isNaN( avgspeed ) ) {
+					var lat = assetMapping[ assetnum ][ 0 ];
+					var lng = assetMapping[ assetnum ][ 1 ];
+
+					for( var j = count; j > 0; j-- ) {
+						var tlat = lat;
+						var tlng = lng;
+
+						if( Math.random() > 0.5 ) {
+							tlat += ( ( Math.random() - 0.5 ) * 0.00005 * avgspeed );
+						} else {
+							tlng += ( ( Math.random() - 0.5 ) * 0.00005 * avgspeed );
+						}
+
+						temparray.push( [ tlat, tlng, count / maxcount ] );
+					}
+				} else {
+					console.warn( "average speed is NaN or count is 0" );
+				}
+			}
+
+			carsLayer = L.heatLayer( temparray, carlocations.mapoptions ).addTo( map );
+		} else {
+			console.log( "cars locations left: " + carlocations.processed );
+		}
+	}
+
+	$scope.toggleCarState = function( carStatus ){
+		if( ! carStatus ) {
+			map.removeLayer( carsLayer );
+		} else {
+			map.addLayer( carsLayer );
 		}
 	}
 }]);
