@@ -1,7 +1,7 @@
 <div class="header">
 	<div class="cont">
 		<p class="title"><b>Traffix</b> <span>/</span> San Diego</p>
-		<p class="loading" ng-show="loading"><img src="images/loading.gif"> Loading...</p>
+		<p class="loading"><img src="images/loading.gif" ng-show="loading"> Loading...</p>
 	</div>
 </div>
 
@@ -16,7 +16,7 @@
 	<div class="cont">
 		<ul class="inline">
 			<li><input type="checkbox" ng-model="cameraStatus" ng-change="toggleCameraState(cameraStatus)"> GE smart LED streetlights</li>
-			<li><input type="checkbox" ng-model="accidentStatus" ng-change="toggleAccidentState(accidentStatus)"> Accidents</li>
+			<li><input type="checkbox" ng-model="accidentStatus" ng-change="toggleAccidentState(accidentStatus)"> Fatal Accidents</li>
 			<li><input type="checkbox" ng-model="pedestrianStatus" ng-change="togglePedestrianState(pedestrianStatus)"> Pedestrian Heatmap</li>
 			<li><input type="checkbox" ng-model="carStatus" ng-change="toggleCarState(carStatus)"> Car Heatmap</li>
 			<li><input type="checkbox" ng-model="showGraph" ng-change="toggleGraph(showGraph)"> Graphs</li>

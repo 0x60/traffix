@@ -41,12 +41,15 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 		headerHeight: 60,
 		thingsToLoad: [
 			false, // map
-			false, // chart
+			false, // accident chart
 			false, // accidents
 			false, // streetlights
 			false, // pedestrian heat maps
-			false // car heatmaps
-		]
+			false, // car heatmaps
+			false // speed chart
+		],
+		timeValue: 3,
+		timeUnit: 'hour'
 	};
 
 	// inital
@@ -142,6 +145,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 	}
 
 	function initChart() {
+		// accidents per year chart
 		$.get( "assets/accidents_SanDiego.txt", function( data ) {
 			// get json
 			var accidentsTime = {};
@@ -156,15 +160,15 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 
 				var year = d.getFullYear();
 
+				// ensure year is not NaN
 				if(isNaN(year))
 					continue;
 
-				if(!accidentsTime[year.toString()]){
-					accidentsTime[year.toString()] = 1;
-				}
-				else{
-					accidentsTime[year.toString()] += 1;
-				}
+				year = year.toString();
+
+				// ensure year exists and add accident to year
+				if( ! accidentsTime[ year ] ) accidentsTime[ year ] = 0;
+				accidentsTime[ year ]++;
 			}
 
 			var years = Object.keys(accidentsTime);
@@ -215,10 +219,88 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 			        maintainAspectRatio: false
 			    }
 			});
+
+			// trigger accident chart loaded
+			CONFIG.thingsToLoad[ 1 ] = true;
+			checkAllLoaded();
 		} );
 
-		// trigger chart loaded
-		CONFIG.thingsToLoad[ 1 ] = true;
+		// speed over time chart
+		/*
+		var accidentsTime = {};
+
+		// iterate through items
+		for( var i = 0; i < data.length; i++ ) {
+			var d = new Date(data[i]['time']);
+
+			if(d === 'Invalid Date')
+				continue;
+
+			var year = d.getFullYear();
+
+			// ensure year is not NaN
+			if(isNaN(year))
+				continue;
+
+			year = year.toString();
+
+			// ensure year exists and add accident to year
+			if( ! accidentsTime[ year ] ) accidentsTime[ year ] = 0;
+			accidentsTime[ year ]++;
+		}
+
+		var years = Object.keys(accidentsTime);
+		var myData = [];
+
+		for(var i = 0; i < years.length; i++){
+			myData.push(accidentsTime[years[i]]);
+		}
+
+		var chartContext = document.getElementById( "speedOverTime" );
+		var speedTimeChart = new Chart( chartContext, {
+			type: 'line',
+			data: {
+			    labels: years,
+			    datasets: [{
+			        label: "Average Speed",
+			        fill: false,
+			        lineTension: 0,
+			        backgroundColor: "rgba(192,134,75,0.4)",
+			        borderColor: "rgba(192,134,75,1)",
+			        borderCapStyle: 'butt',
+			        borderDash: [],
+			        borderDashOffset: 0.0,
+			        borderJoinStyle: 'miter',
+			        pointBorderColor: "rgba(192,134,75,1)",
+			        pointBackgroundColor: "#fff",
+			        pointBorderWidth: 1,
+			        pointHoverRadius: 5,
+			        pointHoverBackgroundColor: "rgba(192,134,75,1)",
+			        pointHoverBorderColor: "rgba(220,220,220,1)",
+			        pointHoverBorderWidth: 2,
+			        pointRadius: 1,
+			        pointHitRadius: 10,
+			        data: myData,
+			        spanGaps: false,
+			    }]
+			},
+			options: {
+			    scales: {
+			        yAxes: [{
+			            ticks: {
+			                beginAtZero: true
+			            }
+			        }]
+			    },
+			    responsive: false,
+			    maintainAspectRatio: false
+			}
+		} );
+
+		*/
+
+		// trigger speed chart loaded
+		CONFIG.thingsToLoad[ 6 ] = true;
 		checkAllLoaded();
 	}
 
@@ -320,7 +402,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 		}).then(function(){
 			// populate the start time, end time and size to give calls to apis.
 			var endTime = moment.now();
-			var startTime = moment(endTime).subtract(3, 'hour').valueOf();
+			var startTime = moment(endTime).subtract( CONFIG.timeValue, CONFIG.timeUnit ).valueOf();
 			$scope.endTime = endTime;
 			$scope.startTime = startTime;
 
@@ -705,8 +787,6 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 			var eTime = $scope.endTime;
 			var aNumber = listItem.properties.assetnumber;
 
-
-
 			var imageURL;
 
 			CurrentServices.getPublicSafetyData( $scope.uaaToken, sTime, eTime, aNumber ).then( function( data ) {
@@ -719,7 +799,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 						var event = data._embedded.medias[eventsIdx];
 						if(event['media-type'] === 'IMAGE') {
 							imageURL = event.url;
-							break;
+							// break; -- let us get the latest image
 						}
 					}
 
@@ -922,10 +1002,13 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 	 */
 	function checkAllLoaded() {
 		for( var i = 0; i < CONFIG.thingsToLoad.length; i++ ) {
-			if( ! CONFIG.thingsToLoad[ i ] )
+			if( ! CONFIG.thingsToLoad[ i ] ) {
+				console.warn( "Still loading: " + i );
 				return false;
+			}
 		}
 
 		$scope.loading = false;
+		$( ".loading" ).text( "Showing data from the past " + CONFIG.timeValue + " " + CONFIG.timeUnit + "s" );
 	}
 }]);
