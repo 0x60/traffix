@@ -4,43 +4,62 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 		getPitneyTokenAndPlot();
 	} );
 
-	// predix stuff
-	var startingAsset = 1000000018;
-	var numAssets = 12;
+	// TODO: make this dynamic
+	// configuration
+	var CONFIG = {
+		assets: [
+			1000000018,
+			1000000019,
+			1000000020,
+			1000000021,
+			1000000022,
+			1000000023,
+			1000000024,
+			1000000025,
+			1000000026,
+			1000000027,
+			1000000028,
+			1000000029
+		],
+		assetLocations: {
+			"1000000018": [ 32.711653, -117.157314 ],
+			"1000000019": [ 32.712668, -117.157546 ],
+			"1000000020": [ 32.711664, -117.156404 ],
+			"1000000021": [ 32.712514, -117.158185 ],
+			"1000000022": [ 32.712695, -117.157313 ],
+			"1000000023": [ 32.712513, -117.157283 ],
+			"1000000024": [ 32.712471, -117.158423 ],
+			"1000000025": [ 32.711628, -117.156618 ],
+			"1000000026": [ 32.711421, -117.157264 ],
+			"1000000027": [ 32.713758, -117.155512 ],
+			"1000000028": [ 32.713765, -117.156406 ],
+			"1000000029": [ 32.713744, -117.157333 ]
+		},
+		showPitneyBowes: false,
+		timerLimit: 1500,
+		footerHeight: 60,
+		headerHeight: 60,
+		thingsToLoad: [
+			false, // map
+			false, // chart
+			false, // accidents
+			false, // streetlights
+			false, // pedestrian heat maps
+			false // car heatmaps
+		]
+	};
 
 	// inital
+	$scope.loading = true;
+
 	$scope.cameraStatus = true;
-	$scope.accidentStatus = false;
+	$scope.accidentStatus = true;
 	$scope.pedestrianStatus = true;
 	$scope.carStatus = true;
 	$scope.showGraph = false;
 
-	//
-	var assetNumbers = [];
 	$scope.trafficData = [];
 	$scope.pedestrianData = [];
-	var timerLimit = 1500; // 1.5s
-
-	// TODO: make this dynamic
-	var assetMapping = {
-		"1000000018": [ 32.711653, -117.157314 ],
-		"1000000019": [ 32.712668, -117.157546 ],
-		"1000000020": [ 32.711664, -117.156404 ],
-		"1000000021": [ 32.712514, -117.158185 ],
-		"1000000022": [ 32.712695, -117.157313 ],
-		"1000000023": [ 32.712513, -117.157283 ],
-		"1000000024": [ 32.712471, -117.158423 ],
-		"1000000025": [ 32.711628, -117.156618 ],
-		"1000000026": [ 32.711421, -117.157264 ],
-		"1000000027": [ 32.713758, -117.155512 ],
-		"1000000028": [ 32.713765, -117.156406 ],
-		"1000000029": [ 32.713744, -117.157333 ]
-	};
-
-	// generate asset numbers
-	for(var i = 0; i < numAssets; i++){
-		assetNumbers.push(startingAsset + i);
-	}
 
 	// map stuff
 	var map;
@@ -96,16 +115,14 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 		timer: undefined
 	};
 
-	var footerHeight = 60;
-
 	function initMap() {
 		// make map height of screen
-		document.getElementById("map").style.height = ( window.innerHeight - footerHeight ) + "px";
+		document.getElementById("map").style.height = ( window.innerHeight - CONFIG.footerHeight - CONFIG.headerHeight ) + "px";
 
 		// init map
 		L.mapbox.accessToken = 'pk.eyJ1IjoidHVuZ2FsYmVydDk5IiwiYSI6ImNpcXhkbGplbTAxZnhmdm1nMjkycnE5ZjYifQ.nPjdhFFlu1agC8JmquUkkw';
 
-		map = L.mapbox.map( 'map' ).setView( [32.7157, -117.1611], 16 );
+		map = L.mapbox.map( 'map' ).setView( [32.712053, -117.157479], 16 );
 		L.tileLayer('https://api.mapbox.com/styles/v1/tungalbert99/ciqxdskwv0007c4ktiubhssd4/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoidHVuZ2FsYmVydDk5IiwiYSI6ImNpcXhkbGplbTAxZnhmdm1nMjkycnE5ZjYifQ.nPjdhFFlu1agC8JmquUkkw').addTo(map);
 
 		camerasLayer = L.mapbox.featureLayer().addTo( map );
@@ -119,10 +136,12 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 
 		initChart();
 
-		console.log( "Map Initialized." );
+		// trigger map loaded
+		CONFIG.thingsToLoad[ 0 ] = true;
+		checkAllLoaded();
 	}
 
-	function initChart(){
+	function initChart() {
 		$.get( "assets/accidents_SanDiego.txt", function( data ) {
 			// get json
 			var accidentsTime = {};
@@ -162,7 +181,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 			      labels: years,
 	    			datasets: [
 			        	{
-			            label: "Number of Fatal Accidents over Time",
+			            label: "# of Fatal Accidents",
 			            fill: false,
 			            lineTension: 0,
 			            backgroundColor: "rgba(75,192,192,0.4)",
@@ -192,18 +211,18 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 			                }
 			            }]
 			        },
-			        responsive: true,
+			        responsive: false,
 			        maintainAspectRatio: false
 			    }
 			});
-
-			
 		} );
+
+		// trigger chart loaded
+		CONFIG.thingsToLoad[ 1 ] = true;
+		checkAllLoaded();
 	}
 
-	function plotCameras() {
-		console.log( "Plotting Cameras" );
-
+	function plotStreetlights() {
 		// get request
 		$.get( "assets/sandiegocameras.json", function( data ) {
 			var data = data[ "_embedded" ][ "assets" ];
@@ -239,7 +258,11 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 			$scope.getCameraAddress();
 			$scope.getCameraImage();
 
-			cameralocations.timer = setInterval( checkCameraGeoJsonDone, timerLimit );
+			cameralocations.timer = setInterval( checkCameraGeoJsonDone, CONFIG.timerLimit );
+
+			// trigger streetlights loaded
+			CONFIG.thingsToLoad[ 3 ] = true;
+			checkAllLoaded();
 		} );
 	}
 
@@ -262,7 +285,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 					},
 					"properties": {
 						"title": "Accident at " + data[ i ].locationName,
-						"description": data[ i ].vehicles + " vehicles involved.",
+						"description": "Involved: " + data[ i ].vehicles + " vehicle(s), " + data[ i ].persons + " person(s), " + data[ i ].pedestrians + " pedestrian(s), " + data[ i ].fatalities + " fatalities, " + data[ i ].drunkenPersons + " drunk. " + data[ i ].time,
 						"marker-color": "#ffa0d3",
 						"marker-size": "large",
 						"marker-symbol": "car"
@@ -274,7 +297,11 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 
 			$scope.getAccidentsAddress();
 
-			accidentslocations.timer = setInterval( checkAccidentsGeoJsonDone, timerLimit );
+			accidentslocations.timer = setInterval( checkAccidentsGeoJsonDone, CONFIG.timerLimit );
+
+			// trigger accidents loaded
+			CONFIG.thingsToLoad[ 2 ] = true;
+			checkAllLoaded();
 		} );
 
 	}
@@ -298,25 +325,20 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 			$scope.startTime = startTime;
 
 			// get pedestrian data for each asset
-			for(var i = 0; i < assetNumbers.length; i++){
-				pedestrianlocations.counts[ assetNumbers[ i ] ] = 0;
-				carlocations.counts[ assetNumbers[ i ] ] = 0;
+			for(var i = 0; i < CONFIG.assets.length; i++){
+				pedestrianlocations.counts[ CONFIG.assets[ i ] ] = 0;
+				carlocations.counts[ CONFIG.assets[ i ] ] = 0;
 
 				pedestrianlocations.processed++;
 				carlocations.processed++;
 
-				$scope.getPedestrianData( startTime, endTime, assetNumbers[ i ] );
-		        $scope.getTrafficData( startTime, endTime, assetNumbers[ i ] );
+				$scope.getPedestrianData( startTime, endTime, CONFIG.assets[ i ] );
+		        $scope.getTrafficData( startTime, endTime, CONFIG.assets[ i ] );
 			}
 
 			// check when to render the heatmaps
-			pedestrianlocations.timer = setInterval( checkPedestriansProcessed, timerLimit );
-			carlocations.timer = setInterval( checkCarsProcessed, timerLimit );
-			
-			// change the size for parking and public safety calls.
-			size = 200;
-			$scope.getPublicSafetyData(startTime, endTime, startingAsset);
-
+			pedestrianlocations.timer = setInterval( checkPedestriansProcessed, CONFIG.timerLimit );
+			carlocations.timer = setInterval( checkCarsProcessed, CONFIG.timerLimit );
 		});
 	};
 
@@ -655,19 +677,26 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 	}
 
 	$scope.getCameraAddress = function() {
-		cameralocations.geojson.forEach( function( listItem, index ) {
-			var latitude = listItem.geometry.coordinates[ 1 ];
-			var longitude = listItem.geometry.coordinates[ 0 ];
+		if( CONFIG.showPitneyBowes ) {
+			cameralocations.geojson.forEach( function( listItem, index ) {
+				var latitude = listItem.geometry.coordinates[ 1 ];
+				var longitude = listItem.geometry.coordinates[ 0 ];
 
-			CurrentServices.getPitneyAddress( $scope.pitneyToken, latitude, longitude ).then( function( data ) {
-				var address = data.location[ 0 ].address;
-				cameralocations.geojson[ index ].properties.address = address.formattedAddress;
-				cameralocations.counter--;
-			}, function( err ) {
+				CurrentServices.getPitneyAddress( $scope.pitneyToken, latitude, longitude ).then( function( data ) {
+					var address = data.location[ 0 ].address;
+					cameralocations.geojson[ index ].properties.address = address.formattedAddress;
+					cameralocations.counter--;
+				}, function( err ) {
+					cameralocations.geojson[ index ].properties.address = "PitneyBowes Error";
+					cameralocations.counter--;
+				} );
+			} );
+		} else {
+			cameralocations.geojson.forEach( function( listItem, index ) {
 				cameralocations.geojson[ index ].properties.address = "PitneyBowes Error";
 				cameralocations.counter--;
 			} );
-		} );
+		}
 	};
 
 	$scope.getCameraImage = function() {
@@ -713,26 +742,33 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 	};
 
 	$scope.getAccidentsAddress = function() {
-		accidentslocations.geojson.forEach( function( listItem, index ) {
-			var latitude = listItem.geometry.coordinates[ 1 ];
-			var longitude = listItem.geometry.coordinates[ 0 ];
-			CurrentServices.getPitneyAddress( $scope.pitneyToken, latitude, longitude ).then( function( data ) {
-				var address = data.location[ 0 ].address;
-				accidentslocations.geojson[ index ].properties.address = address.formattedAddress;
-				accidentslocations.counter--;
-			}, function( err ) {
+		if( CONFIG.showPitneyBowes ) {
+			accidentslocations.geojson.forEach( function( listItem, index ) {
+				var latitude = listItem.geometry.coordinates[ 1 ];
+				var longitude = listItem.geometry.coordinates[ 0 ];
+				CurrentServices.getPitneyAddress( $scope.pitneyToken, latitude, longitude ).then( function( data ) {
+					var address = data.location[ 0 ].address;
+					accidentslocations.geojson[ index ].properties.address = address.formattedAddress;
+					accidentslocations.counter--;
+				}, function( err ) {
+					accidentslocations.geojson[ index ].properties.address = "PitneyBowes Error";
+					accidentslocations.counter--;
+				} );
+			} );
+		} else {
+			accidentslocations.geojson.forEach( function( listItem, index ) {
 				accidentslocations.geojson[ index ].properties.address = "PitneyBowes Error";
 				accidentslocations.counter--;
 			} );
-		} );
+		}
 	};
 
 	function getPitneyTokenAndPlot() {
 		CurrentServices.getPitneyBowesToken().then(function(data){
 			$scope.pitneyToken = data['access_token'];
 		}).then(function(){
-				// plotAccidents();
-				plotCameras();
+				plotAccidents();
+				plotStreetlights();
 		});
 	}
 
@@ -775,14 +811,14 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 			// add to map
 			var temparray = [];
 
-			for( var i = 0; i < assetNumbers.length; i++ ) {
-				var assetnum = assetNumbers[ i ];
+			for( var i = 0; i < CONFIG.assets.length; i++ ) {
+				var assetnum = CONFIG.assets[ i ];
 				var count = pedestrianlocations.counts[ assetnum ];
 
 				if( count >= 0 ) {
 					// only work on counts > 0
-					var lat = assetMapping[ assetnum ][ 0 ];
-					var lng = assetMapping[ assetnum ][ 1 ];
+					var lat = CONFIG.assetLocations[ assetnum ][ 0 ];
+					var lng = CONFIG.assetLocations[ assetnum ][ 1 ];
 
 					for( var j = count; j > 0; j-- ) {
 						var tlat = lat;
@@ -800,6 +836,10 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 			}
 
 			pedestriansLayer = L.heatLayer( temparray, pedestrianlocations.mapoptions ).addTo( map );
+
+			// trigger pedestrian heat map loaded
+			CONFIG.thingsToLoad[ 4 ] = true;
+			checkAllLoaded();
 		} else {
 			console.log( "pedestrian locations left: " + pedestrianlocations.processed );
 		}
@@ -822,14 +862,14 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 			var temparray = [];
 
 			var maxcount = 0;
-			for( var i = 0; i < assetNumbers.length; i++ ) {
-				var assetnum = assetNumbers[ i ];
+			for( var i = 0; i < CONFIG.assets.length; i++ ) {
+				var assetnum = CONFIG.assets[ i ];
 				var count = carlocations.counts[ assetnum ];
 				if( count > maxcount ) maxcount = count;
 			}
 
-			for( var i = 0; i < assetNumbers.length; i++ ) {
-				var assetnum = assetNumbers[ i ];
+			for( var i = 0; i < CONFIG.assets.length; i++ ) {
+				var assetnum = CONFIG.assets[ i ];
 				var count = carlocations.counts[ assetnum ];
 				var speed = carlocations.speeds[ assetnum ];
 				var avgspeed = speed / count;
@@ -839,17 +879,17 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 				// only work on counts > 0
 				// make sure is number lmao
 				if( count > 0 && ! isNaN( avgspeed ) ) {
-					var lat = assetMapping[ assetnum ][ 0 ];
-					var lng = assetMapping[ assetnum ][ 1 ];
+					var lat = CONFIG.assetLocations[ assetnum ][ 0 ];
+					var lng = CONFIG.assetLocations[ assetnum ][ 1 ];
 
 					for( var j = count; j > 0; j-- ) {
 						var tlat = lat;
 						var tlng = lng;
 
 						if( Math.random() > 0.5 ) {
-							tlat += ( ( Math.random() - 0.5 ) * 0.0001 * avgspeed );
+							tlat += ( ( Math.random() - 0.5 ) * 0.0002 * avgspeed );
 						} else {
-							tlng += ( ( Math.random() - 0.5 ) * 0.0001 * avgspeed );
+							tlng += ( ( Math.random() - 0.5 ) * 0.0002 * avgspeed );
 						}
 
 						temparray.push( [ tlat, tlng, count / maxcount * 0.2 ] );
@@ -860,6 +900,10 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 			}
 
 			carsLayer = L.heatLayer( temparray, carlocations.mapoptions ).addTo( map );
+
+			// trigger cars heat map loaded
+			CONFIG.thingsToLoad[ 5 ] = true;
+			checkAllLoaded();
 		} else {
 			console.log( "cars locations left: " + carlocations.processed );
 		}
@@ -871,5 +915,17 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 		} else {
 			map.addLayer( carsLayer );
 		}
+	}
+
+	/**
+	 * Helper Functions
+	 */
+	function checkAllLoaded() {
+		for( var i = 0; i < CONFIG.thingsToLoad.length; i++ ) {
+			if( ! CONFIG.thingsToLoad[ i ] )
+				return false;
+		}
+
+		$scope.loading = false;
 	}
 }]);
