@@ -30,9 +30,9 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 			"1000000028": [ 32.713765, -117.156406 ],
 			"1000000029": [ 32.713744, -117.157333 ]
 		},
-		showPitneyBowes: false,
+		showPitneyBowes: true,
 		timerLimit: 3000,
-		footerHeight: 60,
+		footerHeight: 80,
 		headerHeight: 60,
 		thingsToLoad: [
 			false, // map
@@ -42,7 +42,6 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 			false, // pedestrian heat maps
 			false // car heatmaps
 		],
-		timeValue: 3,
 		timeUnit: 'hour'
 	};
 
@@ -52,13 +51,15 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 	} );
 
 	// inital
-	$scope.loading = true;
+	$scope.isLoading = true;
 
 	$scope.cameraStatus = true;
 	$scope.accidentStatus = true;
 	$scope.pedestrianStatus = true;
 	$scope.carStatus = true;
 	$scope.showGraph = false;
+
+	$scope.hoursEndRange = 3;
 
 	$scope.trafficData = [];
 	$scope.pedestrianData = [];
@@ -129,6 +130,8 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 
 		camerasLayer = L.mapbox.featureLayer().addTo( map );
 		accidentsLayer = L.mapbox.featureLayer().addTo( map );
+		pedestriansLayer = L.heatLayer( [], pedestrianlocations.mapoptions ).addTo( map );
+		carsLayer = L.heatLayer( [], carlocations.mapoptions ).addTo( map );
 
 		// disable zoom
 		// map.touchZoom.disable();
@@ -308,6 +311,21 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 
 	}
 
+	$scope.hoursChanged = function() {
+		$( "input[type=range]" )[ 0 ].disabled = true;
+
+		carsLayer.setLatLngs( [] );
+		pedestriansLayer.setLatLngs( [] );
+
+		CONFIG.thingsToLoad[ 5 ] = true;
+		CONFIG.thingsToLoad[ 4 ] = true;
+
+		$scope.isLoading = true;
+		$( ".loading" ).text( "Loading..." );
+
+		fetchUAA();
+	};
+
 	// Whenever this controller is loaded, it will give a call to below method.
 	fetchUAA();
 
@@ -322,7 +340,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 		}).then(function(){
 			// populate the start time, end time and size to give calls to apis.
 			var endTime = moment.now();
-			var startTime = moment(endTime).subtract( CONFIG.timeValue, CONFIG.timeUnit ).valueOf();
+			var startTime = moment(endTime).subtract( $scope.hoursEndRange, CONFIG.timeUnit ).valueOf();
 			$scope.endTime = endTime;
 			$scope.startTime = startTime;
 
@@ -858,7 +876,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 				}
 			}
 
-			pedestriansLayer = L.heatLayer( temparray, pedestrianlocations.mapoptions ).addTo( map );
+			pedestriansLayer.setLatLngs( temparray );
 
 			// trigger pedestrian heat map loaded
 			CONFIG.thingsToLoad[ 4 ] = true;
@@ -922,7 +940,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 				}
 			}
 
-			carsLayer = L.heatLayer( temparray, carlocations.mapoptions ).addTo( map );
+			carsLayer.setLatLngs( temparray );
 
 			// trigger cars heat map loaded
 			CONFIG.thingsToLoad[ 5 ] = true;
@@ -950,7 +968,8 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 			}
 		}
 
-		$scope.loading = false;
-		$( ".loading" ).text( "Showing data from the past " + CONFIG.timeValue + " " + CONFIG.timeUnit + "s" );
+		$scope.isLoading = false;
+		$( ".loading" ).text( "Showing data from the past " + $scope.hoursEndRange + " " + CONFIG.timeUnit + "s" );
+		$( "input[type=range]" )[ 0 ].disabled = false;
 	}
 }]);

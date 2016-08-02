@@ -1,7 +1,7 @@
 <div class="header">
 	<div class="cont">
 		<p class="title"><b>Traffix</b> <span>/</span> San Diego</p>
-		<p class="loading"><img src="images/loading.gif" ng-show="loading"> Loading...</p>
+		<p class="loading"><img src="images/loading.gif" ng-show="isLoading"> Loading...</p>
 	</div>
 </div>
 
@@ -20,6 +20,7 @@
 			<li><input type="checkbox" ng-model="pedestrianStatus" ng-change="togglePedestrianState(pedestrianStatus)"> Pedestrian Heatmap</li>
 			<li><input type="checkbox" ng-model="carStatus" ng-change="toggleCarState(carStatus)"> Car Heatmap</li>
 			<li><input type="checkbox" ng-model="showGraph" ng-change="toggleGraph(showGraph)"> Graphs</li>
+			<li><input type="range" ng-model="hoursEndRange" ng-change="hoursChanged()" min="1" max="12"> Show Past {{hoursEndRange}} Hours</li>
 		</ul>
 	</div>
 </div>
