@@ -369,7 +369,7 @@ app.service('CurrentServices', ['$http', '$q', function($http, $q) {
   }
 
   function getPitneyBowesToken() {
-    var token = 'Basic ' + 'ZXJvbkZrRXRrSkpTalZOMXRkV3ZSNXVFczFWaUxZa246UWx1R2RmVzkyVEdHTjlhbg==';
+    var token = 'Basic ' + 'Vk04VThYbG5VbHYyM3hFT21oZzdmanlpeTBBWDhqNVU6RFFKbXJJOXZwQ3FHY0dmNw==';
 
     var url = 'https://api.pitneybowes.com/oauth/token';
 
