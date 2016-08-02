@@ -650,7 +650,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 
 				content += '<div class="img-cont">';
 				for( var i = 0; i < feature.properties.images.length; i++ )
-					content += '<div class="img-holder"><a href="' + feature.properties.images[ 0 ] + '" target="_blank"><img src=' + feature.properties.images[ 0 ] + '></a></div>';
+					content += '<div class="img-holder"><a href="' + feature.properties.images[ i ] + '" target="_blank"><img src=' + feature.properties.images[ i ] + '></a></div>';
 				content += '</div>';
 
 				marker.bindPopup( content );
