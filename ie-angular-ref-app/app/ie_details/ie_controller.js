@@ -36,7 +36,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 			"1000000029": [ 32.713744, -117.157333 ]
 		},
 		showPitneyBowes: false,
-		timerLimit: 1500,
+		timerLimit: 3000,
 		footerHeight: 60,
 		headerHeight: 60,
 		thingsToLoad: [
@@ -224,84 +224,6 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 			CONFIG.thingsToLoad[ 1 ] = true;
 			checkAllLoaded();
 		} );
-
-		// speed over time chart
-		/*
-		var accidentsTime = {};
-
-		// iterate through items
-		for( var i = 0; i < data.length; i++ ) {
-			var d = new Date(data[i]['time']);
-
-			if(d === 'Invalid Date')
-				continue;
-
-			var year = d.getFullYear();
-
-			// ensure year is not NaN
-			if(isNaN(year))
-				continue;
-
-			year = year.toString();
-
-			// ensure year exists and add accident to year
-			if( ! accidentsTime[ year ] ) accidentsTime[ year ] = 0;
-			accidentsTime[ year ]++;
-		}
-
-		var years = Object.keys(accidentsTime);
-		var myData = [];
-
-		for(var i = 0; i < years.length; i++){
-			myData.push(accidentsTime[years[i]]);
-		}
-
-		var chartContext = document.getElementById( "speedOverTime" );
-		var speedTimeChart = new Chart( chartContext, {
-			type: 'line',
-			data: {
-			    labels: years,
-			    datasets: [{
-			        label: "Average Speed",
-			        fill: false,
-			        lineTension: 0,
-			        backgroundColor: "rgba(192,134,75,0.4)",
-			        borderColor: "rgba(192,134,75,1)",
-			        borderCapStyle: 'butt',
-			        borderDash: [],
-			        borderDashOffset: 0.0,
-			        borderJoinStyle: 'miter',
-			        pointBorderColor: "rgba(192,134,75,1)",
-			        pointBackgroundColor: "#fff",
-			        pointBorderWidth: 1,
-			        pointHoverRadius: 5,
-			        pointHoverBackgroundColor: "rgba(192,134,75,1)",
-			        pointHoverBorderColor: "rgba(220,220,220,1)",
-			        pointHoverBorderWidth: 2,
-			        pointRadius: 1,
-			        pointHitRadius: 10,
-			        data: myData,
-			        spanGaps: false,
-			    }]
-			},
-			options: {
-			    scales: {
-			        yAxes: [{
-			            ticks: {
-			                beginAtZero: true
-			            }
-			        }]
-			    },
-			    responsive: false,
-			    maintainAspectRatio: false
-			}
-		} );
-
-		*/
-
-		// trigger speed chart loaded
-		CONFIG.thingsToLoad[ 6 ] = true;
-		checkAllLoaded();
 	}
 
 	function plotStreetlights() {
@@ -329,6 +251,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 						"marker-size": "large",
 						"marker-symbol": "camera",
 						"image": "",
+						"images": [],
 						"assetnumber": data[ i ][ "_links" ][ "self" ][ "href" ].match(/assets\/([0-9]+)/)[ 1 ]
 					}
 				} );
@@ -349,8 +272,6 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 	}
 
 	function plotAccidents() {
-		console.log( "Plotting Accidents" );
-
 		$.get( "assets/accidents_SanDiego.txt", function( data ) {
 			// get json
 			var data = JSON.parse( data );
@@ -428,6 +349,14 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 	* Below method will make a call to traffic event Service and
 	* populates the response data in scope object.
 	*/
+
+	// speed over time chart
+	var initialData = {
+		"7:00 PM": 54,
+		"8:00 PM": 40,
+		"9:00 PM": 60
+	};
+
 	$scope.getTrafficData = function(startTime, endTime, assetNumber) {
 		// make sure we dont get NaNs
 		if( isNaN( carlocations.counts[ assetNumber ] ) ) carlocations.counts[ assetNumber ] = 0;
@@ -724,7 +653,15 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 			camerasLayer.on( 'layeradd', function( e ) {
 				var marker = e.layer,
 					feature = marker.feature;
-				var content = '<h2>' + feature.properties.title + '<\/h2>' + '<p>' + feature.properties.address + '<\/p>' + '<p>' + feature.properties.description + '<\/p>' + '<p><b>Most Recent Image:<\/b><\/p><img src=' + feature.properties.image + '>';
+
+				// generate content
+				var content = '<h2>' + feature.properties.title + '<\/h2>' + '<p>' + feature.properties.address + '<\/p>' + '<p>' + feature.properties.description + '<\/p>' + '<h3>Recent Images:<\/h3>';
+
+				content += '<div class="img-cont">';
+				for( var i = 0; i < feature.properties.images.length; i++ )
+					content += '<div class="img-holder"><a href="' + feature.properties.images[ 0 ] + '" target="_blank"><img src=' + feature.properties.images[ 0 ] + '></a></div>';
+				content += '</div>';
+
 				marker.bindPopup( content );
 			} );
 
@@ -788,6 +725,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 			var aNumber = listItem.properties.assetnumber;
 
 			var imageURL;
+			var imageURLs = [];
 
 			CurrentServices.getPublicSafetyData( $scope.uaaToken, sTime, eTime, aNumber ).then( function( data ) {
 				// get camera data
@@ -799,20 +737,32 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 						var event = data._embedded.medias[eventsIdx];
 						if(event['media-type'] === 'IMAGE') {
 							imageURL = event.url;
-							// break; -- let us get the latest image
+							imageURLs.push( event.url );
 						}
 					}
 
 					// replace http with https
-					imageURL = imageURL.replace(/^http:\/\//i, 'https://');
-
 					// get image from our reverse proxy
+					imageURL = imageURL.replace(/^http:\/\//i, 'https://');
 					CurrentServices.getImage( $scope.uaaToken, imageURL ).then( function( data ) {
 						cameralocations.imageCounter--;
 						cameralocations.geojson[ index ].properties.image = data;
 					}, function( err ) {
 						cameralocations.imageCounter--;
 					} );
+
+					// now do it for the list
+					for( var i = 0; i < imageURLs.length; i++ ) {
+						cameralocations.imageCounter++;
+
+						imageURLs[ i ] = imageURLs[ i ].replace(/^http:\/\//i, 'https://');
+						CurrentServices.getImage( $scope.uaaToken, imageURLs[ i ] ).then( function( data ) {
+							cameralocations.imageCounter--;
+							cameralocations.geojson[ index ].properties.images.push( data );
+						}, function( err ) {
+							cameralocations.imageCounter--;
+						} );
+					}
 				} else {
 					// no camera data
 					cameralocations.imageCounter--;
@@ -954,8 +904,6 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 				var speed = carlocations.speeds[ assetnum ];
 				var avgspeed = speed / count;
 
-				console.log( "asset %s: %d - %d", assetnum, count, speed );
-
 				// only work on counts > 0
 				// make sure is number lmao
 				if( count > 0 && ! isNaN( avgspeed ) ) {
@@ -984,6 +932,59 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 			// trigger cars heat map loaded
 			CONFIG.thingsToLoad[ 5 ] = true;
 			checkAllLoaded();
+
+			// draw graph
+			var chartLabels = Object.keys( initialData );
+			var chartData = [];
+
+			for( var i = 0; i < chartLabels.length; i++ ){
+				chartData.push( initialData[ chartLabels[ i ] ] );
+			}
+
+			var chartContext = document.getElementById( "speedOverTime" );
+			var speedTimeChart = new Chart( chartContext, {
+				type: 'line',
+				data: {
+				    labels: chartLabels,
+				    datasets: [{
+				        label: "Average Speed",
+				        fill: false,
+				        lineTension: 0,
+				        backgroundColor: "rgba(192,134,75,0.4)",
+				        borderColor: "rgba(192,134,75,1)",
+				        borderCapStyle: 'butt',
+				        borderDash: [],
+				        borderDashOffset: 0.0,
+				        borderJoinStyle: 'miter',
+				        pointBorderColor: "rgba(192,134,75,1)",
+				        pointBackgroundColor: "#fff",
+				        pointBorderWidth: 1,
+				        pointHoverRadius: 5,
+				        pointHoverBackgroundColor: "rgba(192,134,75,1)",
+				        pointHoverBorderColor: "rgba(220,220,220,1)",
+				        pointHoverBorderWidth: 2,
+				        pointRadius: 1,
+				        pointHitRadius: 10,
+				        data: chartData,
+				        spanGaps: false,
+				    }]
+				},
+				options: {
+				    scales: {
+				        yAxes: [{
+				            ticks: {
+				                beginAtZero: true
+				            }
+				        }]
+				    },
+				    responsive: false,
+				    maintainAspectRatio: false
+				}
+			} );
+
+			// trigger speed chart loaded
+			CONFIG.thingsToLoad[ 6 ] = true;
+			checkAllLoaded();
 		} else {
 			console.log( "cars locations left: " + carlocations.processed );
 		}
@@ -1003,7 +1004,6 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 	function checkAllLoaded() {
 		for( var i = 0; i < CONFIG.thingsToLoad.length; i++ ) {
 			if( ! CONFIG.thingsToLoad[ i ] ) {
-				console.warn( "Still loading: " + i );
 				return false;
 			}
 		}

@@ -1,3 +1,26 @@
-#map img {
-	width: 100%;
+#map .img-cont {
+  width: 260px;
+  max-height: 200px;
+  overflow: scroll;
+  padding-left: 5px;
+  padding-top: 5px;
+}
+
+#map .img-cont:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+#map .img-cont .img-holder {
+  display: inline-block;
+  float: left;
+  width: 80px;
+  margin-right: 5px;
+  margin-bottom: 5px;
+}
+
+#map .img-cont .img-holder img {
+  width: 100%;
+  height: auto;
 }
