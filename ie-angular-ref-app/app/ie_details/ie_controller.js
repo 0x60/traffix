@@ -8,6 +8,13 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 	var startingAsset = 1000000018;
 	var numAssets = 12;
 
+	// inital
+	$scope.cameraStatus = true;
+	$scope.accidentStatus = false;
+	$scope.pedestrianStatus = true;
+	$scope.carStatus = true;
+	$scope.showGraph = false;
+
 	//
 	var assetNumbers = [];
 	$scope.trafficData = [];
@@ -89,7 +96,7 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 		timer: undefined
 	};
 
-	var footerHeight = 100;
+	var footerHeight = 60;
 
 	function initMap() {
 		// make map height of screen

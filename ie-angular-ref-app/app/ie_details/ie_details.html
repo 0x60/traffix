@@ -1,21 +1,17 @@
 <div id="map">
-  <div ng-show="showGraph" class="overlay">
-      <canvas id="myChart"></canvas>
-  </div>
+	<div ng-show="showGraph" class="overlay">
+		<canvas id="myChart"></canvas>
+	</div>
 </div>
 
-<div class="container-fluid" style="padding-left: 0px;">
- 
-  <!-- end row -->
-
-  <input type="checkbox" ng-model="cameraStatus" ng-change="toggleCameraState(cameraStatus)">Cameras</input>
-  <input type="checkbox" ng-model="accidentStatus" ng-change="toggleAccidentState(
-  accidentStatus)">Accidents</input>
-  <input type="checkbox" ng-model="pedestrianStatus" ng-change="togglePedestrianState(
-  pedestrianStatus)">Pedestrians</input>
-  <input type="checkbox" ng-model="carStatus" ng-change="toggleCarState(carStatus)">Cars</input>
-  <input type="checkbox" ng-model="showGraph" ng-change="toggleGraph(showGraph)">Graphs</input>
-
-  </div>
-  <!-- end row -->
+<div class="footer">
+	<div class="cont">
+		<input type="checkbox" ng-model="cameraStatus" ng-change="toggleCameraState(cameraStatus)">Cameras</input>
+		<input type="checkbox" ng-model="accidentStatus" ng-change="toggleAccidentState(
+		accidentStatus)">Accidents</input>
+		<input type="checkbox" ng-model="pedestrianStatus" ng-change="togglePedestrianState(
+		pedestrianStatus)">Pedestrians</input>
+		<input type="checkbox" ng-model="carStatus" ng-change="toggleCarState(carStatus)">Cars</input>
+		<input type="checkbox" ng-model="showGraph" ng-change="toggleGraph(showGraph)">Graphs</input>
+	</div>
 </div>
