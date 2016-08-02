@@ -1,9 +1,4 @@
 app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, CurrentServices) {
-	$( document ).ready( function() {
-		initMap();
-		getPitneyTokenAndPlot();
-	} );
-
 	// TODO: make this dynamic
 	// configuration
 	var CONFIG = {
@@ -45,12 +40,16 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 			false, // accidents
 			false, // streetlights
 			false, // pedestrian heat maps
-			false, // car heatmaps
-			false // speed chart
+			false // car heatmaps
 		],
 		timeValue: 3,
 		timeUnit: 'hour'
 	};
+
+	$( document ).ready( function() {
+		initMap();
+		getPitneyTokenAndPlot();
+	} );
 
 	// inital
 	$scope.loading = true;
@@ -349,14 +348,6 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 	* Below method will make a call to traffic event Service and
 	* populates the response data in scope object.
 	*/
-
-	// speed over time chart
-	var initialData = {
-		"7:00 PM": 54,
-		"8:00 PM": 40,
-		"9:00 PM": 60
-	};
-
 	$scope.getTrafficData = function(startTime, endTime, assetNumber) {
 		// make sure we dont get NaNs
 		if( isNaN( carlocations.counts[ assetNumber ] ) ) carlocations.counts[ assetNumber ] = 0;
@@ -856,7 +847,9 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 
 						if( Math.random() > 0.5 ) {
 							tlat += ( ( Math.random() - 0.5 ) * 0.001 );
+							tlng += ( ( Math.random() - 0.5 ) * 0.00001 );
 						} else {
+							tlat += ( ( Math.random() - 0.5 ) * 0.00001 );
 							tlng += ( ( Math.random() - 0.5 ) * 0.001 );
 						}
 
@@ -916,7 +909,9 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 
 						if( Math.random() > 0.5 ) {
 							tlat += ( ( Math.random() - 0.5 ) * 0.0002 * avgspeed );
+							tlng += ( ( Math.random() - 0.5 ) * 0.000002 * avgspeed );
 						} else {
+							tlat += ( ( Math.random() - 0.5 ) * 0.000002 * avgspeed );
 							tlng += ( ( Math.random() - 0.5 ) * 0.0002 * avgspeed );
 						}
 
@@ -931,59 +926,6 @@ app.controller('IEServiceCtrl', ['$scope','CurrentServices',function($scope, Cur
 
 			// trigger cars heat map loaded
 			CONFIG.thingsToLoad[ 5 ] = true;
-			checkAllLoaded();
-
-			// draw graph
-			var chartLabels = Object.keys( initialData );
-			var chartData = [];
-
-			for( var i = 0; i < chartLabels.length; i++ ){
-				chartData.push( initialData[ chartLabels[ i ] ] );
-			}
-
-			var chartContext = document.getElementById( "speedOverTime" );
-			var speedTimeChart = new Chart( chartContext, {
-				type: 'line',
-				data: {
-				    labels: chartLabels,
-				    datasets: [{
-				        label: "Average Speed",
-				        fill: false,
-				        lineTension: 0,
-				        backgroundColor: "rgba(192,134,75,0.4)",
-				        borderColor: "rgba(192,134,75,1)",
-				        borderCapStyle: 'butt',
-				        borderDash: [],
-				        borderDashOffset: 0.0,
-				        borderJoinStyle: 'miter',
-				        pointBorderColor: "rgba(192,134,75,1)",
-				        pointBackgroundColor: "#fff",
-				        pointBorderWidth: 1,
-				        pointHoverRadius: 5,
-				        pointHoverBackgroundColor: "rgba(192,134,75,1)",
-				        pointHoverBorderColor: "rgba(220,220,220,1)",
-				        pointHoverBorderWidth: 2,
-				        pointRadius: 1,
-				        pointHitRadius: 10,
-				        data: chartData,
-				        spanGaps: false,
-				    }]
-				},
-				options: {
-				    scales: {
-				        yAxes: [{
-				            ticks: {
-				                beginAtZero: true
-				            }
-				        }]
-				    },
-				    responsive: false,
-				    maintainAspectRatio: false
-				}
-			} );
-
-			// trigger speed chart loaded
-			CONFIG.thingsToLoad[ 6 ] = true;
 			checkAllLoaded();
 		} else {
 			console.log( "cars locations left: " + carlocations.processed );
